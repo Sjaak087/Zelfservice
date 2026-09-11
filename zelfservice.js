@@ -11,7 +11,11 @@ let actieveModalProduct = null; // { id, naam, prijs, opmerkingen: [...] }
 let modalAantal = 1;
 let modalGekozenPreset = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
+let restaurantLuisteraar = null;
+let laadTimeout = null;
+let paginaGeladen = false;
+
+document.addEventListener('DOMContentLoaded', () => {
   restaurantId = getQueryParam('restaurant');
 
   if (!restaurantId) {
@@ -19,25 +23,58 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  try {
-    const snap = await restaurantRef(restaurantId).once('value');
-    if (!snap.exists()) {
-      toonLaadFout('Dit restaurant bestaat niet (meer).');
-      return;
-    }
-    restaurant = snap.val();
-  } catch (fout) {
-    console.error(fout);
-    toonLaadFout('Kan geen verbinding maken met het restaurant.');
-    return;
-  }
-
-  document.getElementById('restaurant-naam').textContent = restaurant.naam || 'Zelfservice';
-  document.getElementById('laad-scherm').classList.add('verborgen');
-
-  renderTafels();
-  toonStap('tafel');
   koppelEvents();
+
+  // Lees het restaurant rechtstreeks en live uit Firebase.
+  // Daardoor blijven producten, tafels en opmerkingen actueel zonder lokale instellingen.
+  restaurantLuisteraar = restaurantRef(restaurantId);
+
+  laadTimeout = setTimeout(() => {
+    if (!paginaGeladen) {
+      toonLaadFout('Het restaurant kan niet worden geladen. Controleer de Firebase-verbinding en probeer het opnieuw.');
+    }
+  }, 10000);
+
+  restaurantLuisteraar.on(
+    'value',
+    (snap) => {
+      if (!snap.exists()) {
+        paginaGeladen = true;
+        clearTimeout(laadTimeout);
+        toonLaadFout('Dit restaurant bestaat niet (meer).');
+        return;
+      }
+
+      restaurant = snap.val();
+      paginaGeladen = true;
+      clearTimeout(laadTimeout);
+
+      document.getElementById('restaurant-naam').textContent = restaurant.naam || 'Zelfservice';
+      document.getElementById('laad-scherm').classList.add('verborgen');
+
+      // Producten en tafels komen altijd opnieuw uit Firebase.
+      if (!gekozenTafel) {
+        renderTafels();
+        toonStap('tafel');
+      } else {
+        renderMenu();
+        toonStap('menu');
+      }
+    },
+    (fout) => {
+      console.error(fout);
+      paginaGeladen = true;
+      clearTimeout(laadTimeout);
+      toonLaadFout('Kan geen verbinding maken met het restaurant.');
+    }
+  );
+});
+
+window.addEventListener('beforeunload', () => {
+  if (restaurantLuisteraar) {
+    restaurantLuisteraar.off();
+  }
+  if (laadTimeout) clearTimeout(laadTimeout);
 });
 
 function toonLaadFout(tekst) {
@@ -140,7 +177,7 @@ function openProductModal(product) {
   document.getElementById('modaal-opmerking-vrij').value = '';
   document.getElementById('modaal-aantal').textContent = '1';
 
-  // Vooraf ingestelde opmerkingen (uit instellingen) alleen tonen als ze er zijn.
+  // Vooraf ingestelde opmerkingen rechtstreeks uit Firebase tonen.
   const presetBlok = document.getElementById('modaal-preset-blok');
   const presetChips = document.getElementById('modaal-preset-chips');
   const presets = Array.isArray(product.opmerkingen) ? product.opmerkingen.filter(Boolean) : [];

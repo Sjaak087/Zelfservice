@@ -3,9 +3,10 @@
 Een kant-en-klare website (puur HTML/CSS/JS, geen build-tools nodig) die je op
 GitHub Pages kunt zetten. Gasten openen de link van hún restaurant, het systeem
 herkent automatisch welk restaurant dat is, en ze kunnen daarna hun tafel of
-bank kiezen en producten bestellen — inclusief opmerkingen. Tafels en
-producten haalt de site rechtstreeks uit Firebase; je beheert ze in de
-Firebase Console (zie hieronder), er zit geen aparte beheerpagina in de site.
+bank kiezen en producten bestellen — inclusief opmerkingen. Tafels, producten,
+opmerkingen en restaurantgegevens worden rechtstreeks en live uit Firebase
+Realtime Database geladen. Er is geen lokale productlijst en geen instellingen-
+of beheerpagina in de site; beheer doe je in Firebase.
 
 ## Bestanden
 
@@ -78,8 +79,7 @@ restaurants/
 ```
 
 - **`opmerkingen`** op een product zijn de vaste keuzes (bijv. "Zonder ui").
-  Ze verschijnen in de zelfservice alleen bij producten waar dit veld
-  daadwerkelijk aanwezig is — een product zonder `opmerkingen` toont dat blok
+  Ze verschijnen in de zelfservice alleen bij producten waar dit veld daadwerkelijk aanwezig is — een product zonder `opmerkingen` toont dat blok
   gewoon niet. Daarnaast kan de gast altijd zelf iets vrij typen; beide worden
   gecombineerd opgeslagen in `items[].opmerking`.
 - **`bestellingen`** is precies de plek waar jouw keukensysteem naar kan
