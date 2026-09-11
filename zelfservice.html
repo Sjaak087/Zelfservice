@@ -674,27 +674,113 @@ const db = firebase.database();
 (function(){
   'use strict';
   var restaurantId = null, restaurant = null, gekozenTafel = null, mandje = [];
-  var actieveModalProduct = null, modalAantal = 1, modalGekozenPreset = null, restaurantLuisteraar = null, timeoutId = null;
-  var loaded = false;
+  var actieveModalProduct = null, modalAantal = 1, modalGekozenPreset = null;
+  var restaurantLuisteraar = null, codesLuisteraar = null, timeoutId = null;
+  var loaded = false, resolvedCode = null;
 
-  function getRestaurantIdFromLink(){
+  function cleanCode(v){
+    try { v = decodeURIComponent(String(v || '')); } catch(e) { v = String(v || ''); }
+    return v.trim();
+  }
+  function norm(v){ return cleanCode(v).toLowerCase(); }
+
+  function getJoinCodeFromLink(){
+    var keys = ['joinCode','joincode','join_code','code','restaurantCode','restaurant_code','restaurantId','restaurant_id','restaurant','r'];
     var params = new URLSearchParams(location.search);
-    var values = [params.get('restaurant'), params.get('restaurantId'), params.get('restaurant_id'), params.get('r')];
-    for (var i=0;i<values.length;i++){ if(values[i] && values[i].trim()) return values[i].trim(); }
-    var hash = new URLSearchParams((location.hash||'').replace(/^#/,''));
-    var hashKeys = ['restaurant','restaurantId','restaurant_id','r'];
-    for (var j=0;j<hashKeys.length;j++){ var hv=hash.get(hashKeys[j]); if(hv && hv.trim()) return hv.trim(); }
+    for (var i=0;i<keys.length;i++){
+      var v = cleanCode(params.get(keys[i]));
+      if(v) return v;
+    }
+
+    var hashRaw=(location.hash||'').replace(/^#/,'');
+    if(hashRaw){
+      try{
+        var hash = new URLSearchParams(hashRaw);
+        for (var j=0;j<keys.length;j++){
+          var hv=cleanCode(hash.get(keys[j]));
+          if(hv) return hv;
+        }
+      }catch(e){}
+      if(!hashRaw.includes('=')) return cleanCode(hashRaw);
+    }
+
     var parts = location.pathname.split('/').filter(Boolean);
+    var markers=['join','joincode','code','restaurant','restaurants','zelfservice','zelfservice.html','qr'];
     for (var k=0;k<parts.length-1;k++){
       var marker=parts[k].toLowerCase();
-      if(marker==='restaurant' || marker==='restaurants' || marker==='zelfservice' || marker==='zelfservice.html') return decodeURIComponent(parts[k+1]);
+      if(markers.indexOf(marker)!==-1) return cleanCode(parts[k+1]);
+    }
+    if(parts.length){
+      var last=cleanCode(parts[parts.length-1]);
+      if(last && !/\.(html?|php|aspx)$/i.test(last) && last.toLowerCase()!=='index') return last;
     }
     return null;
   }
+
+  function extractRestaurantId(value, fallbackKey){
+    if(value == null) return fallbackKey || null;
+    if(typeof value === 'string' || typeof value === 'number') return cleanCode(value) || fallbackKey || null;
+    if(typeof value !== 'object') return fallbackKey || null;
+    var keys=['restaurantId','restaurant_id','restaurantID','restaurant','restaurantKey','restaurantRef','id','idRestaurant'];
+    for(var i=0;i<keys.length;i++){
+      var v=cleanCode(value[keys[i]]);
+      if(v) return v;
+    }
+    return fallbackKey || null;
+  }
+
+  function looksLikeCodeField(key){
+    return ['code','joinCode','joincode','join_code','restaurantCode','restaurant_code','value','join'].indexOf(key)!==-1;
+  }
+
+  function resolveRestaurantId(data, code){
+    var target=norm(code);
+    if(!data || !target) return null;
+
+    // Vorm 1: restaurantCodes/{joinCode} = restaurantId
+    var directKeys=Object.keys(data);
+    for(var i=0;i<directKeys.length;i++){
+      var key=directKeys[i], value=data[key];
+      if(norm(key)===target){
+        var direct=extractRestaurantId(value, (typeof value==='string'||typeof value==='number') ? value : null);
+        if(direct) return direct;
+      }
+    }
+
+    // Vorm 2/3: restaurantCodes/{restaurantId} = joinCode
+    // of restaurantCodes/{restaurantId} = { joinCode: '...', ... }
+    for(var j=0;j<directKeys.length;j++){
+      var ridKey=directKeys[j], item=data[ridKey];
+      if(typeof item==='string' || typeof item==='number'){
+        if(norm(item)===target) return ridKey;
+        continue;
+      }
+      if(!item || typeof item!=='object') continue;
+
+      var fields=Object.keys(item);
+      for(var k=0;k<fields.length;k++){
+        var field=fields[k], fv=item[field];
+        if(looksLikeCodeField(field) && norm(fv)===target){
+          return extractRestaurantId(item, ridKey);
+        }
+      }
+
+      // Extra robuuste fallback: zoek dezelfde code in stringvelden.
+      for(var m=0;m<fields.length;m++){
+        var sv=item[fields[m]];
+        if((typeof sv==='string'||typeof sv==='number') && norm(sv)===target){
+          return extractRestaurantId(item, ridKey);
+        }
+      }
+    }
+    return null;
+  }
+
   function esc(t){ var d=document.createElement('div'); d.textContent=t==null?'':String(t); return d.innerHTML; }
   function prijs(v){ return '€ ' + (Number(v)||0).toFixed(2).replace('.',','); }
   function arr(o){ if(!o) return []; return Object.keys(o).map(function(id){ return Object.assign({id:id},o[id]||{}); }); }
-  function ref(){ return db.ref('restaurants/' + restaurantId); }
+  function restaurantRef(){ return db.ref('restaurants/' + restaurantId); }
+  function codesRef(){ return db.ref('restaurantCodes'); }
   function setLoading(title,text){ document.getElementById('status-titel').textContent=title; document.getElementById('status-tekst').textContent=text||''; }
   function showError(title,text){
     setLoading(title,text); var box=document.getElementById('error-scherm'); box.className='melding-groot'; box.innerHTML='<strong>'+esc(title)+'</strong><span>'+esc(text)+'</span>';
@@ -730,7 +816,7 @@ const db = firebase.database();
   function updateCart(){var n=count();document.getElementById('mandje-balk').classList.toggle('verborgen',n===0);document.getElementById('mandje-aantal').textContent=n+(n===1?' item':' items');document.getElementById('mandje-totaal').textContent=prijs(total());}
   function openCart(){var el=document.getElementById('mandje-items');el.innerHTML='';if(!mandje.length)el.innerHTML='<p class="leeg-staat">Je bestelling is nog leeg.</p>';else mandje.forEach(function(i,idx){var row=document.createElement('div');row.className='mandje-item';row.innerHTML='<span><div class="mandje-item-naam">'+i.aantal+'× '+esc(i.naam)+'</div>'+(i.opmerking?'<div class="mandje-item-opmerking">'+esc(i.opmerking)+'</div>':'')+'<button class="mandje-item-verwijder">Verwijderen</button></span><span class="mandje-item-prijs">'+prijs(i.prijs*i.aantal)+'</span>';row.querySelector('button').onclick=function(){mandje.splice(idx,1);updateCart();openCart();};el.appendChild(row);});document.getElementById('mandje-modaal-totaal').textContent=prijs(total());document.getElementById('bestelling-plaatsen-knop').disabled=!mandje.length;document.getElementById('mandje-overlay').classList.remove('verborgen');}
   function closeCart(){document.getElementById('mandje-overlay').classList.add('verborgen');}
-  async function placeOrder(){ if(!mandje.length)return;var b=document.getElementById('bestelling-plaatsen-knop');b.disabled=true;b.textContent='Bezig met bestellen…';var order={tafelId:gekozenTafel?gekozenTafel.id:null,tafelNaam:gekozenTafel?(gekozenTafel.naam||gekozenTafel.id):null,items:mandje.map(function(i){return{productId:i.productId,naam:i.naam,prijs:i.prijs,aantal:i.aantal,opmerking:i.opmerking||''};}),totaal:total(),status:'nieuw',tijdstip:firebase.database.ServerValue.TIMESTAMP};try{await ref().child('bestellingen').push(order);document.getElementById('klaar-tekst').textContent='Je bestelling is doorgestuurd naar de keuken voor '+(gekozenTafel?(gekozenTafel.naam||gekozenTafel.id):'je plek')+'.';mandje=[];updateCart();closeCart();showStep('klaar');}catch(e){console.error(e);alert('De bestelling kon niet worden verstuurd. Controleer de Firebase-regels.');}finally{b.disabled=false;b.textContent='Bestelling plaatsen';}}
+  async function placeOrder(){ if(!mandje.length)return;var b=document.getElementById('bestelling-plaatsen-knop');b.disabled=true;b.textContent='Bezig met bestellen…';var order={tafelId:gekozenTafel?gekozenTafel.id:null,tafelNaam:gekozenTafel?(gekozenTafel.naam||gekozenTafel.id):null,items:mandje.map(function(i){return{productId:i.productId,naam:i.naam,prijs:i.prijs,aantal:i.aantal,opmerking:i.opmerking||''};}),totaal:total(),status:'nieuw',tijdstip:firebase.database.ServerValue.TIMESTAMP};try{await restaurantRef().child('bestellingen').push(order);document.getElementById('klaar-tekst').textContent='Je bestelling is doorgestuurd naar de keuken voor '+(gekozenTafel?(gekozenTafel.naam||gekozenTafel.id):'je plek')+'.';mandje=[];updateCart();closeCart();showStep('klaar');}catch(e){console.error(e);alert('De bestelling kon niet worden verstuurd. Controleer de Firebase-regels.');}finally{b.disabled=false;b.textContent='Bestelling plaatsen';}}
   function wire(){
     document.getElementById('modaal-sluiten').onclick=closeProduct;document.getElementById('product-overlay').onclick=function(e){if(e.target.id==='product-overlay')closeProduct();};
     document.getElementById('modaal-min').onclick=function(){modalAantal=Math.max(1,modalAantal-1);document.getElementById('modaal-aantal').textContent=modalAantal;};document.getElementById('modaal-plus').onclick=function(){modalAantal++;document.getElementById('modaal-aantal').textContent=modalAantal;};document.getElementById('modaal-toevoegen').onclick=addCart;
@@ -738,22 +824,59 @@ const db = firebase.database();
     document.getElementById('nieuwe-bestelling-knop').onclick=function(){renderMenu();showStep('menu');};
   }
   function listenRestaurant(){
-    if(!restaurantId){
-      showError('Restaurant ontbreekt in deze QR-link','Deze zelfservice kiest niet meer zelf een restaurant. De QR-code/link moet het restaurant-ID meegeven.');
+    resolvedCode=getJoinCodeFromLink();
+    if(!resolvedCode){
+      showError('Join code ontbreekt','Deze QR-link bevat geen join code. Open de zelfservice via de QR-code van het restaurant.');
       return;
     }
-    setLoading('Een moment…','Restaurantgegevens worden rechtstreeks uit Firebase geladen…');
-    restaurantLuisteraar=ref();
-    timeoutId=setTimeout(function(){if(!loaded)showError('Verbinden met Firebase lukt niet','De website wachtte te lang op Firebase. Controleer de internetverbinding en de Realtime Database Rules.');},8000);
-    restaurantLuisteraar.on('value',function(s){loaded=true;clearTimeout(timeoutId);if(!s.exists()){showError('Restaurant niet gevonden','Het restaurant-ID in deze QR-link bestaat niet onder restaurants/.');return;}restaurant=s.val();document.getElementById('restaurant-naam').textContent=restaurant.naam||'Zelfservice';hideLoading();if(!gekozenTafel){renderTafels();showStep('tafel');}else{renderMenu();showStep('menu');}},function(e){console.error(e);loaded=true;clearTimeout(timeoutId);showError('Firebase-fout','Kan de gegevens van dit restaurant niet lezen. Controleer de Realtime Database Rules.');});
+
+    setLoading('Een moment…','Restaurant wordt opgezocht via de join code…');
+    var codesRefLocal=codesRef();
+    timeoutId=setTimeout(function(){
+      if(!loaded) showError('Verbinden met Firebase lukt niet','De restaurantcode kon niet op tijd uit Firebase worden gelezen. Controleer de internetverbinding en de Firebase-regels voor restaurantCodes.');
+    },10000);
+
+    codesLuisteraar=codesRefLocal.on('value',function(snapshot){
+      var id=resolveRestaurantId(snapshot.val(),resolvedCode);
+      if(!id){
+        showError('Restaurantcode niet gevonden','De join code uit deze QR-link staat niet in restaurantCodes.');
+        return;
+      }
+      restaurantId=id;
+      loaded=true;
+      clearTimeout(timeoutId);
+      if(restaurantLuisteraar) restaurantLuisteraar.off();
+
+      setLoading('Een moment…','Restaurantgegevens worden geladen…');
+      restaurantLuisteraar=restaurantRef();
+      restaurantLuisteraar.on('value',function(s){
+        if(!s.exists()){
+          showError('Restaurant niet gevonden','De restaurantcode is geldig, maar de bijbehorende restaurantgegevens bestaan niet.');
+          return;
+        }
+        restaurant=s.val();
+        document.getElementById('restaurant-naam').textContent=restaurant.naam||'Zelfservice';
+        hideLoading();
+        if(!gekozenTafel){renderTafels();showStep('tafel');}
+        else{renderMenu();showStep('menu');}
+      },function(e){
+        console.error(e);
+        showError('Firebase-fout','Kan de gegevens van dit restaurant niet lezen. Controleer de Realtime Database Rules.');
+      });
+    },function(e){
+      console.error(e);
+      loaded=true;
+      clearTimeout(timeoutId);
+      showError('Firebase-fout','Kan restaurantCodes niet lezen uit Firebase. Controleer de Realtime Database Rules.');
+    });
   }
   document.addEventListener('DOMContentLoaded',function(){
     try{
       if(typeof firebase==='undefined' || typeof db==='undefined'){showError('Firebase SDK niet geladen','De Firebase-scripts konden niet worden geladen. Controleer de internetverbinding.');return;}
-      restaurantId=getRestaurantIdFromLink();wire();listenRestaurant();
+      wire();listenRestaurant();
     }catch(e){console.error(e);showError('Startfout',e&&e.message?e.message:String(e));}
   });
-  window.addEventListener('beforeunload',function(){if(restaurantLuisteraar)restaurantLuisteraar.off();if(timeoutId)clearTimeout(timeoutId);});
+  window.addEventListener('beforeunload',function(){if(restaurantLuisteraar)restaurantLuisteraar.off();if(codesLuisteraar)codesRef().off('value', codesLuisteraar);if(timeoutId)clearTimeout(timeoutId);});
 })();
 </script>
 </body>
