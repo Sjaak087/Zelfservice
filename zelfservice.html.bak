@@ -883,24 +883,24 @@ const db = firebase.database();
   }
 
   function tableDisplayName(t){
-    // In jouw Firebase is de sleutel onder floorplan/tables een interne code.
-    // De zichtbare tafelnaam komt uit de veldwaarde `number`.
-    var nr = t.number ?? t.nummer ?? t.tableNumber;
-    if(nr !== undefined && nr !== null && nr !== '') return 'Tafel ' + nr;
-    return t.naam || t.name || t.label || t.tableName || t.title ||
-           (t.info && (t.info.naam || t.info.name || t.info.label || t.info.number)) ||
-           'Tafel';
+    // De interne Firebase-key is de unieke tafelcode. Gebruik eerst een menselijke naam
+    // uit de tafel-info; anders tonen we de code zodat de juiste tafel altijd herkenbaar is.
+    return t.naam || t.name || t.label || t.number || t.nummer || t.tableNumber ||
+           t.tableName || t.title || (t.info && (t.info.naam || t.info.name || t.info.label || t.info.number)) ||
+           t.id;
   }
 
   function tableInfoText(t){
     var parts=[];
-    var kind=String(t.kind || t.type || '').toLowerCase();
-    if(kind) parts.push(kind === 'tafel' ? 'Tafel' : (t.kind || t.type));
-    if(t.shape) parts.push('Vorm: ' + t.shape);
-    if(t.aantalPlaatsen!==undefined && t.aantalPlaatsen!==null && t.aantalPlaatsen!=='') parts.push('Plaatsen: '+t.aantalPlaatsen);
-    else if(t.seats!==undefined && t.seats!==null && t.seats!=='') parts.push('Plaatsen: '+t.seats);
-    else if(t.capacity!==undefined && t.capacity!==null && t.capacity!=='') parts.push('Capaciteit: '+t.capacity);
-    if(t.status!==undefined && t.status!==null && t.status!=='') parts.push('Status: '+t.status);
+    var valueMap=[
+      ['status','Status'], ['aantalPlaatsen','Plaatsen'], ['seats','Plaatsen'], ['capacity','Capaciteit'],
+      ['zitplaatsen','Plaatsen'], ['positie','Positie'], ['position','Positie'], ['type','Type']
+    ];
+    valueMap.forEach(function(pair){
+      var v=t[pair[0]];
+      if(v!==undefined && v!==null && v!=='') parts.push(pair[1]+': '+(typeof v==='object'?JSON.stringify(v):v));
+    });
+    if(t.info && typeof t.info==='string') parts.push(t.info);
     return parts.join(' • ');
   }
 
@@ -918,21 +918,12 @@ const db = firebase.database();
   function renderTafels(){
     var grid=document.getElementById('tafel-grid'), tafels=extractTablesFromFloorplan();
     if(!tafels.length){grid.innerHTML='<p class="leeg-staat">Er zijn nog geen tafels ingesteld in het floorplan van dit restaurant.</p>';return;}
-    grid.innerHTML='';
-    tafels.sort(function(a,b){
-      var an=Number(a.number ?? a.nummer ?? a.tableNumber);
-      var bn=Number(b.number ?? b.nummer ?? b.tableNumber);
-      if(Number.isFinite(an) && Number.isFinite(bn)) return an-bn;
-      return tableDisplayName(a).localeCompare(tableDisplayName(b),'nl');
-    });
-    tafels.forEach(function(t){
+    grid.innerHTML=''; tafels.forEach(function(t){
       var b=document.createElement('button'); b.className='tafel-knop';
       var naam=tableDisplayName(t);
       var info=tableInfoText(t);
-      b.setAttribute('aria-label', naam + (info ? ', ' + info : ''));
-      b.innerHTML='<span class="merk">'+esc(t.id || '')+'</span><span class="naam">'+esc(naam)+'</span><span class="type">'+esc(info || 'Tafel')+'</span>';
-      b.onclick=function(){gekozenTafel=t;renderMenu();showStep('menu');};
-      grid.appendChild(b);
+      b.innerHTML='<span class="merk"></span><span class="naam">'+esc(naam)+'</span><span class="type">'+esc(info || t.type || t.kind || 'tafel')+'</span>';
+      b.onclick=function(){gekozenTafel=t;renderMenu();showStep('menu');}; grid.appendChild(b);
     });
   }
   function renderMenu(){
