@@ -49,7 +49,7 @@
     for (const t of list) {
       const btn = document.createElement('button');
       btn.className = 'tafel-knop';
-      btn.innerHTML = `<span class="merk">${esc(t.id)}</span><span class="naam">${esc(tableName(t))}</span><span class="type">${esc(tableInfo(t) || 'Tafel')}</span>`;
+      btn.innerHTML = `<span class="naam">${esc(tableName(t))}</span><span class="type">${esc(tableInfo(t) || 'Tafel')}</span>`;
       btn.addEventListener('click', () => { gekozenTafel = t; renderMenu(); showStep('menu'); });
       grid.appendChild(btn);
     }
@@ -110,27 +110,135 @@
     finally { btn.disabled=false; btn.textContent='Bestelling plaatsen'; }
   }
 
-  async function load() {
-    if(!restaurantId && selfserviceCode){
-      try{
-        const snap=await db.ref('restaurants').once('value');
-        const all=snap.val()||{};
-        for(const [id,r] of Object.entries(all)){
-          if(normalizeCode(r?.selfservicecode ?? r?.selfServiceCode ?? r?.selfserviceCode)===normalizeCode(selfserviceCode)){restaurantId=id;break;}
-        }
-      }catch(e){ error('Firebase-fout','Restaurants konden niet worden gelezen.', String(e)); return; }
-    }
-    if(!restaurantId){ error('Geen restaurant','Geen 5-cijferige selfservicecode en geen restaurantId gevonden in de link.'); return; }
+  async function findRestaurantByCode(code) {
+    const clean = normalizeCode(code);
+    if (!clean) return null;
 
-    const ref=restaurantRef(restaurantId);
-    ref.on('value', snap => {
-      if(!snap.exists()){ error('Restaurant niet gevonden', `Restaurant ${restaurantId} bestaat niet.`); return; }
-      restaurant=snap.val()||{};
-      $('restaurant-naam').textContent=restaurant.naam||restaurant.name||'Zelfservice';
-    }, err => console.error('restaurant',err));
-    ref.child('floorplan').child('tables').on('value', snap => { tafels=snap.val()||{}; renderTables(); });
-    ref.child('products').on('value', snap => { producten=snap.val()||{}; if(gekozenTafel) renderMenu(); });
-    hideLoader(); showStep('tafel');
+    // Query Firebase directly instead of reading the entire /restaurants tree.
+    // This is important when Firebase rules do not allow a full collection read.
+    const fieldNames = ['selfservicecode', 'selfServiceCode', 'selfserviceCode', 'selfServicecode'];
+    for (const field of fieldNames) {
+      try {
+        const snap = await db.ref('restaurants')
+          .orderByChild(field)
+          .equalTo(clean)
+          .limitToFirst(1)
+          .once('value');
+        if (snap.exists()) {
+          const data = snap.val() || {};
+          const first = Object.entries(data)[0];
+          if (first) return { id: first[0], data: first[1] || {} };
+        }
+      } catch (e) {
+        console.warn(`Query op ${field} failed`, e);
+      }
+    }
+
+    // Fallback for databases where the code is stored as a number.
+    const numeric = Number(clean);
+    if (Number.isFinite(numeric)) {
+      for (const field of fieldNames) {
+        try {
+          const snap = await db.ref('restaurants')
+            .orderByChild(field)
+            .equalTo(numeric)
+            .limitToFirst(1)
+            .once('value');
+          if (snap.exists()) {
+            const data = snap.val() || {};
+            const first = Object.entries(data)[0];
+            if (first) return { id: first[0], data: first[1] || {} };
+          }
+        } catch (e) {
+          console.warn(`Numeric query ${field} failed`, e);
+        }
+      }
+    }
+    return null;
+  }
+
+  async function load() {
+    $('diagnostiek').textContent = 'Verbinden met Firebase…';
+    $('diagnostiek').classList.remove('verborgen');
+
+    if (!restaurantId && selfserviceCode) {
+      const found = await findRestaurantByCode(selfserviceCode);
+      if (found) {
+        restaurantId = found.id;
+        restaurant = found.data;
+      }
+    }
+
+    if (!restaurantId) {
+      hideLoader();
+      error(
+        'Restaurant niet gevonden',
+        selfserviceCode
+          ? `Geen restaurant gevonden met selfservicecode ${selfserviceCode}.`
+          : 'Geen 5-cijferige selfservicecode gevonden in de QR-link.',
+        'Controleer dat de QR-link de 5-cijferige selfservicecode bevat en dat /restaurants/*/selfservicecode leesbaar is in Firebase.'
+      );
+      return;
+    }
+
+    const ref = restaurantRef(restaurantId);
+
+    // Load restaurant metadata first.
+    try {
+      const snap = await ref.once('value');
+      if (!snap.exists()) {
+        hideLoader();
+        error('Restaurant niet gevonden', `Restaurant ${restaurantId} bestaat niet.`);
+        return;
+      }
+      restaurant = snap.val() || restaurant || {};
+      $('restaurant-naam').textContent = restaurant.naam || restaurant.name || 'Zelfservice';
+    } catch (e) {
+      hideLoader();
+      error('Firebase-fout', 'Het restaurant kon niet worden geladen.', String(e));
+      return;
+    }
+
+    // Tables: exact structure from the restaurant system:
+    // /restaurants/{id}/floorplan/tables/{firebaseTableKey}
+    ref.child('floorplan/tables').on('value', snap => {
+      const raw = snap.val();
+      tafels = raw || {};
+      console.log('Zelfservice tables loaded:', raw);
+      renderTables();
+      hideLoader();
+      $('diagnostiek').textContent = `${values(tafels).length} tafelobject(en) geladen.`;
+      $('diagnostiek').classList.remove('verborgen');
+    }, err => {
+      console.error('tables', err);
+      hideLoader();
+      error('Tafels konden niet worden geladen', 'Firebase blokkeert de toegang tot floorplan/tables.', String(err));
+    });
+
+    // Products
+    ref.child('products').on('value', snap => {
+      producten = snap.val() || {};
+      console.log('Zelfservice products loaded:', snap.val());
+      if (gekozenTafel) renderMenu();
+    }, err => {
+      console.error('products', err);
+      // Products may be unavailable while tables still work; do not keep the page loading.
+      producten = {};
+    });
+
+    // Safety timeout so the page can never be stuck forever on the loader.
+    setTimeout(() => {
+      if (!$('laad-scherm').classList.contains('verborgen')) {
+        hideLoader();
+        error(
+          'Laden duurt te lang',
+          'Firebase antwoordt niet op tijd.',
+          `Restaurant: ${restaurantId || 'onbekend'} • code: ${selfserviceCode || 'geen'}\nControleer Firebase Database Rules en de URL van de QR-code.`
+        );
+      }
+    }, 8000);
+
+    showStep('tafel');
   }
 
   function wire(){
