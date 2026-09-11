@@ -5,7 +5,7 @@
  function base(){var p=location.pathname.split('/').filter(Boolean); if(location.hostname.endsWith('.github.io')) return p.length?'/'+p[0]+'/':'/'; if(p.length>=2 && /^\d{5}$/.test(p[p.length-1])) return '/'+p[0]+'/'; return '/';}
  var b=base(); window.APP_BASE=b; var l=document.createElement('link'); l.rel='stylesheet'; l.href=b+'css/style.css'; document.head.appendChild(l);
  window.addEventListener('error',function(e){var d=document.getElementById('debug'); if(d){d.classList.remove('verborgen'); d.textContent=e.error&&e.error.stack||e.message||'Onbekende fout';}});
- window.__loadScript=function(src){return new Promise(function(ok,no){var s=document.createElement('script');s.src=b+src;s.onload=ok;s.onerror=function(){no(new Error('Kon script niet laden: '+b+src));};document.head.appendChild(s);});};
+ window.__loadScript=function(src){return new Promise(function(ok,no){var s=document.createElement('script');s.src=/^(?:https?:)?\/\//i.test(src)?src:b+src;s.onload=ok;s.onerror=function(){no(new Error('Kon script niet laden: '+b+src));};document.head.appendChild(s);});};
 })();
 </script></head>
 <body><main class="scherm"><div class="centreer-scherm"><h1 class="titel" id="status">Een moment...</h1><p id="substatus">Zelfservice wordt gestart.</p><div id="debug" class="diagnostiek verborgen"></div></div></main>

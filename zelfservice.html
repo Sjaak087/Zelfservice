@@ -91,7 +91,7 @@
   var base=appBase(); window.APP_BASE=base;
   function add(tag,attrs){ var el=document.createElement(tag); Object.keys(attrs).forEach(function(k){el.setAttribute(k,attrs[k]);}); document.head.appendChild(el); return el; }
   add('link',{rel:'stylesheet',href:base+'css/style.css'});
-  window.__loadScript=function(src){ return new Promise(function(resolve,reject){ var s=document.createElement('script'); s.src=base+src; s.onload=resolve; s.onerror=function(){reject(new Error('Kon script niet laden: '+base+src));}; document.head.appendChild(s); }); };
+  window.__loadScript=function(src){ return new Promise(function(resolve,reject){ var s=document.createElement('script'); s.src=/^(?:https?:)?\/\//i.test(src)?src:base+src; s.onload=resolve; s.onerror=function(){reject(new Error('Kon script niet laden: '+base+src));}; document.head.appendChild(s); }); };
   window.addEventListener('error',function(e){ var box=document.getElementById('diagnostiek')||document.getElementById('debug'); if(box){box.classList.remove('verborgen'); box.textContent='Fout: '+(e.error&&e.error.stack||e.message||'Onbekende fout');} });
 })();
 </script>
