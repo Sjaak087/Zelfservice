@@ -653,8 +653,7 @@ select:focus-visible {
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
 <script>
-// Vul hier je eigen Firebase-gegevens in.
-// Nadat je dit hebt ingevuld werkt de hele app (index.html, restaurant.html) op elk apparaat.
+// Firebase-configuratie van het restaurantsysteem.
 
 const firebaseConfig = {
   apiKey: "AIzaSyBVwx6eUdSkebGIK2J_NDwOD3rxTcIg1v4",
@@ -840,15 +839,74 @@ const db = firebase.database();
     document.querySelectorAll('.route [data-stap]').forEach(function(el){el.classList.toggle('actief',el.dataset.stap===step);});
     document.getElementById('mandje-balk').classList.toggle('verborgen', !(step==='menu' && mandje.length));
   }
+  function valuesFromNode(node){
+    if(!node) return [];
+    if(Array.isArray(node)) return node.map(function(v,i){
+      if(v && typeof v==='object') return Object.assign({id:String(i)},v);
+      return {id:String(i), waarde:v};
+    });
+    if(typeof node!=='object') return [];
+    return Object.keys(node).map(function(id){
+      var v=node[id];
+      if(v && typeof v==='object') return Object.assign({id:id},v);
+      return {id:id, waarde:v};
+    });
+  }
+
+  function extractTablesFromFloorplan(){
+    // De database gebruikt /restaurants/{id}/floorplan voor de indeling.
+    // Ondersteun zowel floorplan.tables, floorplan.tafels als een floorplan-object
+    // waarin de tafelobjecten direct staan.
+    var fp=restaurant && restaurant.floorplan;
+    if(!fp) return [];
+
+    var candidates=[fp.tables, fp.tafels, fp.table, fp.items, fp.objects, fp.elements];
+    for(var i=0;i<candidates.length;i++){
+      var list=valuesFromNode(candidates[i]).filter(function(t){
+        return t && typeof t==='object' && (
+          t.type==='table' || t.type==='tafel' || t.kind==='table' || t.kind==='tafel' ||
+          t.table===true || t.isTable===true || t.soort==='tafel' ||
+          t.naam || t.name || t.number || t.nummer
+        );
+      });
+      if(list.length) return list;
+    }
+
+    // Als floorplan direct een collectie tafels bevat.
+    var direct=valuesFromNode(fp).filter(function(t){
+      return t && typeof t==='object' && (
+        t.type==='table' || t.type==='tafel' || t.kind==='table' || t.kind==='tafel' ||
+        t.table===true || t.isTable===true || t.naam || t.name || t.number || t.nummer
+      );
+    });
+    return direct;
+  }
+
+  function extractProducts(){
+    // Producten staan in /restaurants/{id}/products.
+    // Hou /producten als compatibiliteit met oudere data.
+    var node=restaurant && (restaurant.products || restaurant.producten || restaurant.menu);
+    if(!node) return [];
+    var list=valuesFromNode(node);
+    // Soms zit de collectie nog één niveau dieper.
+    if(list.length===1 && list[0] && typeof list[0].products==='object') return valuesFromNode(list[0].products);
+    return list;
+  }
+
   function renderTafels(){
-    var grid=document.getElementById('tafel-grid'), tafels=arr(restaurant.tafels);
-    if(!tafels.length){grid.innerHTML='<p class="leeg-staat">Er zijn nog geen tafels ingesteld voor dit restaurant.</p>';return;}
-    grid.innerHTML=''; tafels.forEach(function(t){ var b=document.createElement('button'); b.className='tafel-knop'; b.innerHTML='<span class="merk"></span><span class="naam">'+esc(t.naam||t.id)+'</span><span class="type">'+esc(t.type||'tafel')+'</span>'; b.onclick=function(){gekozenTafel=t;renderMenu();showStep('menu');}; grid.appendChild(b); });
+    var grid=document.getElementById('tafel-grid'), tafels=extractTablesFromFloorplan();
+    if(!tafels.length){grid.innerHTML='<p class="leeg-staat">Er zijn nog geen tafels ingesteld in het floorplan van dit restaurant.</p>';return;}
+    grid.innerHTML=''; tafels.forEach(function(t){
+      var b=document.createElement('button'); b.className='tafel-knop';
+      var naam=t.naam||t.name||t.number||t.nummer||t.label||t.id;
+      b.innerHTML='<span class="merk"></span><span class="naam">'+esc(naam)+'</span><span class="type">'+esc(t.type||t.kind||'tafel')+'</span>';
+      b.onclick=function(){gekozenTafel=t;renderMenu();showStep('menu');}; grid.appendChild(b);
+    });
   }
   function renderMenu(){
-    var list=document.getElementById('menu-lijst'), products=arr(restaurant.producten), groepen={};
-    if(!products.length){list.innerHTML='<p class="leeg-staat">Er staan nog geen producten op het menu.</p>';return;}
-    products.forEach(function(p){var c=p.categorie||'Overig';(groepen[c]||(groepen[c]=[])).push(p);}); list.innerHTML='';
+    var list=document.getElementById('menu-lijst'), products=extractProducts(), groepen={};
+    if(!products.length){list.innerHTML='<p class="leeg-staat">Er staan nog geen producten in products voor dit restaurant.</p>';return;}
+    products.forEach(function(p){var c=p.categorie||p.category||p.categoryName||'Overig';(groepen[c]||(groepen[c]=[])).push(p);}); list.innerHTML='';
     Object.keys(groepen).forEach(function(c){ var h=document.createElement('div');h.className='categorie-titel';h.textContent=c;list.appendChild(h); groepen[c].forEach(function(p){ var b=document.createElement('button');b.className='product-rij';b.innerHTML='<span><span class="product-naam">'+esc(p.naam||'')+'</span>'+(p.omschrijving?'<div class="product-omschrijving">'+esc(p.omschrijving)+'</div>':'')+'</span><span class="product-prijs">'+prijs(p.prijs)+'</span>';b.onclick=function(){openProduct(p);};list.appendChild(b);});});
   }
   function openProduct(p){
