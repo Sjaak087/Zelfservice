@@ -1,14 +1,1 @@
-<!doctype html>
-<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Zelfservice</title>
-<script>
-(function(){
- function base(){var p=location.pathname.split('/').filter(Boolean); if(location.hostname.endsWith('.github.io')) return p.length?'/'+p[0]+'/':'/'; if(p.length>=2 && /^\d{5}$/.test(p[p.length-1])) return '/'+p[0]+'/'; return '/';}
- var b=base(); window.APP_BASE=b; var l=document.createElement('link'); l.rel='stylesheet'; l.href=b+'css/style.css'; document.head.appendChild(l);
- window.addEventListener('error',function(e){var d=document.getElementById('debug'); if(d){d.classList.remove('verborgen'); d.textContent=e.error&&e.error.stack||e.message||'Onbekende fout';}});
- window.__loadScript=function(src){return new Promise(function(ok,no){var s=document.createElement('script');s.src=/^(?:https?:)?\/\//i.test(src)?src:b+src;s.onload=ok;s.onerror=function(){no(new Error('Kon script niet laden: '+b+src));};document.head.appendChild(s);});};
-})();
-</script></head>
-<body><main class="scherm"><div class="centreer-scherm"><h1 class="titel" id="status">Een moment...</h1><p id="substatus">Zelfservice wordt gestart.</p><div id="debug" class="diagnostiek verborgen"></div></div></main>
-<script>
-(async function(){try{await __loadScript('https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js');await __loadScript('https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js');await __loadScript('js/firebase-config.js');await __loadScript('js/common.js');var code=findFiveDigitCode();if(!code){document.getElementById('status').textContent='Geen selfservicecode';document.getElementById('substatus').textContent='Open de zelfservice via de QR-link van het restaurant.';return;}document.getElementById('substatus').textContent='Restaurant zoeken met code '+code+'…';var fields=['selfservicecode','selfServiceCode','selfserviceCode','self_service_code','selfservice-code'];var found=null;for(const f of fields){try{const snap=await db.ref('restaurants').orderByChild(f).equalTo(code).limitToFirst(1).once('value');if(snap.exists()){const o=snap.val();const e=Object.entries(o)[0];if(e){found=e[0];break;}}}catch(err){console.warn(err)}}if(!found){document.getElementById('status').textContent='Restaurant niet gevonden';document.getElementById('substatus').textContent='Geen restaurant gevonden met selfservicecode '+code+'.';return;}location.href=APP_BASE+'zelfservice.html?restaurantId='+encodeURIComponent(found)+'&selfservicecode='+encodeURIComponent(code);}catch(e){document.getElementById('status').textContent='Zelfservice kan niet starten';document.getElementById('substatus').textContent='Controleer GitHub Pages en Firebase.';var d=document.getElementById('debug');d.classList.remove('verborgen');d.textContent=String(e&&e.stack||e);}})();
-</script></body></html>
+<!doctype html><html><body><script>location.replace((location.pathname.split('/').filter(Boolean).length?'/'+location.pathname.split('/').filter(Boolean)[0]+'/':'/')+(location.pathname.match(/(?:^|\/)(\d{5})(?:\/)?$/)?'?selfservicecode='+RegExp.$1:''));</script></body></html>
