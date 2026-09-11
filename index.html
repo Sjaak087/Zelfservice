@@ -781,6 +781,50 @@ const db = firebase.database();
   function arr(o){ if(!o) return []; return Object.keys(o).map(function(id){ return Object.assign({id:id},o[id]||{}); }); }
   function restaurantRef(){ return db.ref('restaurants/' + restaurantId); }
   function codesRef(){ return db.ref('restaurantCodes'); }
+  function restaurantsRef(){ return db.ref('restaurants'); }
+
+  // Zoek eerst rechtstreeks op restaurant-ID/key en daarna op de naam van het restaurant.
+  // Dit maakt de QR/link onafhankelijk van de aparte restaurantCodes-tabel wanneer de
+  // code in de praktijk gelijk is aan de Firebase-key of restaurantnaam.
+  function findRestaurantByCode(data, code){
+    var target=norm(code);
+    if(!data || !target) return null;
+    var keys=Object.keys(data);
+    for(var i=0;i<keys.length;i++){
+      var key=keys[i], item=data[key];
+      if(norm(key)===target) return key;
+      if(item && typeof item==='object'){
+        var naam=cleanCode(item.naam || item.name || item.restaurantNaam || item.restaurantName);
+        if(naam && norm(naam)===target) return key;
+      }
+    }
+    return null;
+  }
+
+  function startRestaurant(id){
+    if(!id) return false;
+    restaurantId=id;
+    loaded=true;
+    clearTimeout(timeoutId);
+    if(restaurantLuisteraar) restaurantLuisteraar.off();
+    setLoading('Een moment…','Restaurantgegevens worden geladen…');
+    restaurantLuisteraar=restaurantRef();
+    restaurantLuisteraar.on('value',function(s){
+      if(!s.exists()){
+        showError('Restaurant niet gevonden','De opgegeven restaurantcode bestaat niet in Firebase.');
+        return;
+      }
+      restaurant=s.val();
+      document.getElementById('restaurant-naam').textContent=restaurant.naam||'Zelfservice';
+      hideLoading();
+      if(!gekozenTafel){renderTafels();showStep('tafel');}
+      else{renderMenu();showStep('menu');}
+    },function(e){
+      console.error(e);
+      showError('Firebase-fout','Kan de gegevens van dit restaurant niet lezen. Controleer de Realtime Database Rules.');
+    });
+    return true;
+  }
   function setLoading(title,text){ document.getElementById('status-titel').textContent=title; document.getElementById('status-tekst').textContent=text||''; }
   function showError(title,text){
     setLoading(title,text); var box=document.getElementById('error-scherm'); box.className='melding-groot'; box.innerHTML='<strong>'+esc(title)+'</strong><span>'+esc(text)+'</span>';
@@ -826,48 +870,33 @@ const db = firebase.database();
   function listenRestaurant(){
     resolvedCode=getJoinCodeFromLink();
     if(!resolvedCode){
-      showError('Join code ontbreekt','Deze QR-link bevat geen join code. Open de zelfservice via de QR-code van het restaurant.');
+      showError('Restaurantcode ontbreekt','De QR-link bevat geen herkenbare restaurantcode. Gebruik de QR-link die door het restaurantsysteem is aangemaakt.');
       return;
     }
 
-    setLoading('Een moment…','Restaurant wordt opgezocht via de join code…');
-    var codesRefLocal=codesRef();
+    setLoading('Een moment…','Restaurant wordt opgezocht…');
     timeoutId=setTimeout(function(){
-      if(!loaded) showError('Verbinden met Firebase lukt niet','De restaurantcode kon niet op tijd uit Firebase worden gelezen. Controleer de internetverbinding en de Firebase-regels voor restaurantCodes.');
+      if(!loaded) showError('Verbinden met Firebase lukt niet','Het restaurant kon niet op tijd worden opgezocht. Controleer de internetverbinding en de Firebase-regels.');
     },10000);
 
-    codesLuisteraar=codesRefLocal.on('value',function(snapshot){
-      var id=resolveRestaurantId(snapshot.val(),resolvedCode);
-      if(!id){
-        showError('Restaurantcode niet gevonden','De join code uit deze QR-link staat niet in restaurantCodes.');
+    // 1. Eerst rechtstreeks zoeken in restaurants op Firebase-key of restaurantnaam.
+    restaurantsRef().once('value').then(function(snapshot){
+      var directId=findRestaurantByCode(snapshot.val(),resolvedCode);
+      if(directId){
+        startRestaurant(directId);
         return;
       }
-      restaurantId=id;
-      loaded=true;
-      clearTimeout(timeoutId);
-      if(restaurantLuisteraar) restaurantLuisteraar.off();
 
-      setLoading('Een moment…','Restaurantgegevens worden geladen…');
-      restaurantLuisteraar=restaurantRef();
-      restaurantLuisteraar.on('value',function(s){
-        if(!s.exists()){
-          showError('Restaurant niet gevonden','De restaurantcode is geldig, maar de bijbehorende restaurantgegevens bestaan niet.');
-          return;
-        }
-        restaurant=s.val();
-        document.getElementById('restaurant-naam').textContent=restaurant.naam||'Zelfservice';
-        hideLoading();
-        if(!gekozenTafel){renderTafels();showStep('tafel');}
-        else{renderMenu();showStep('menu');}
-      },function(e){
-        console.error(e);
-        showError('Firebase-fout','Kan de gegevens van dit restaurant niet lezen. Controleer de Realtime Database Rules.');
+      // 2. Daarna restaurantCodes proberen als fallback voor bestaande QR-codes.
+      return codesRef().once('value').then(function(codeSnap){
+        var id=resolveRestaurantId(codeSnap.val(),resolvedCode);
+        if(id && startRestaurant(id)) return;
+        showError('Restaurant niet gevonden','De code uit deze QR-link komt niet overeen met een restaurant in Firebase.');
       });
-    },function(e){
+    }).catch(function(e){
       console.error(e);
-      loaded=true;
       clearTimeout(timeoutId);
-      showError('Firebase-fout','Kan restaurantCodes niet lezen uit Firebase. Controleer de Realtime Database Rules.');
+      showError('Firebase-fout','Kan de restaurants uit Firebase niet lezen. Controleer de Realtime Database Rules.');
     });
   }
   document.addEventListener('DOMContentLoaded',function(){
