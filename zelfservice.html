@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zelfservice</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<main class="scherm">
+
+  <div class="kop">
+    <div class="kop-boven">
+      <div class="restaurant-naam" id="restaurant-naam">...</div>
+    </div>
+    <div class="route" id="route">
+      <span data-stap="tafel">Tafel</span>
+      <span class="scheiding">→</span>
+      <span data-stap="menu">Menu</span>
+      <span class="scheiding">→</span>
+      <span data-stap="klaar">Besteld</span>
+    </div>
+  </div>
+
+  <div class="inhoud">
+
+    <!-- Laadscherm / foutscherm -->
+    <div class="centreer-scherm" id="laad-scherm">
+      <p>Een moment, we laden het menu...</p>
+    </div>
+
+    <!-- Stap 1: tafel of bank kiezen -->
+    <section id="stap-tafel" class="verborgen">
+      <h1 class="titel" style="font-size:1.4rem; margin-bottom:14px;">Waar zit je?</h1>
+      <div class="tafel-grid" id="tafel-grid"></div>
+    </section>
+
+    <!-- Stap 2: menu -->
+    <section id="stap-menu" class="verborgen">
+      <div id="menu-lijst"></div>
+    </section>
+
+    <!-- Stap 3: bevestiging -->
+    <section id="stap-klaar" class="verborgen">
+      <div class="centreer-scherm">
+        <div class="vink">✓</div>
+        <h1 class="titel">Bestelling geplaatst</h1>
+        <p id="klaar-tekst"></p>
+        <button class="hoofd-knop" id="nieuwe-bestelling-knop" style="max-width:280px;">Nog iets bestellen</button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Mandje balk, alleen zichtbaar in het menu-scherm met items -->
+  <div class="mandje-balk verborgen" id="mandje-balk">
+    <div class="mandje-info">
+      <span class="mandje-aantal" id="mandje-aantal">0 items</span>
+      <span class="mandje-totaal" id="mandje-totaal">€ 0,00</span>
+    </div>
+    <button class="hoofd-knop" id="mandje-openen-knop">Bekijk bestelling</button>
+  </div>
+
+</main>
+
+<!-- Modal: product kiezen met opmerking -->
+<div class="overlay verborgen" id="product-overlay">
+  <div class="modaal">
+    <div class="modaal-kop">
+      <div>
+        <div class="product-naam" style="font-size:1.3rem;" id="modaal-naam"></div>
+        <div class="product-prijs" id="modaal-prijs"></div>
+      </div>
+      <button class="sluit-knop" id="modaal-sluiten" aria-label="Sluiten">×</button>
+    </div>
+
+    <div id="modaal-preset-blok" class="verborgen">
+      <label class="veld-label" id="modaal-preset-label">Opmerking</label>
+      <div class="chip-rij" id="modaal-preset-chips"></div>
+    </div>
+
+    <label class="veld-label" for="modaal-opmerking-vrij">Eigen opmerking (optioneel)</label>
+    <textarea class="opmerking-veld" id="modaal-opmerking-vrij" placeholder="Bijv. allergie, extra verzoek..."></textarea>
+
+    <div class="aantal-rij">
+      <button class="aantal-knop" id="modaal-min">−</button>
+      <span class="aantal-getal" id="modaal-aantal">1</span>
+      <button class="aantal-knop" id="modaal-plus">+</button>
+    </div>
+
+    <button class="hoofd-knop" id="modaal-toevoegen">Toevoegen aan bestelling</button>
+  </div>
+</div>
+
+<!-- Modal: mandje / bestelling overzicht -->
+<div class="overlay verborgen" id="mandje-overlay">
+  <div class="modaal">
+    <div class="modaal-kop">
+      <div class="product-naam" style="font-size:1.3rem;">Jouw bestelling</div>
+      <button class="sluit-knop" id="mandje-sluiten" aria-label="Sluiten">×</button>
+    </div>
+
+    <div id="mandje-items"></div>
+    <div class="totaal-rij"><span>Totaal</span><span id="mandje-modaal-totaal">€ 0,00</span></div>
+
+    <button class="hoofd-knop" id="bestelling-plaatsen-knop">Bestelling plaatsen</button>
+    <button class="tekst-knop" id="mandje-verder-knop">Verder bestellen</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/common.js"></script>
+<script src="js/zelfservice.js"></script>
+
+</body>
+</html>

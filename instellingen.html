@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Instellingen</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<main class="scherm">
+
+  <div class="kop">
+    <div class="kop-boven">
+      <div class="restaurant-naam">Instellingen</div>
+    </div>
+    <div class="route" id="route-sub"></div>
+  </div>
+
+  <div class="inhoud">
+
+    <div id="melding-algemeen" class="melding verborgen"></div>
+
+    <!-- Restaurant kiezen / aanmaken -->
+    <div class="paneel">
+      <h2>Restaurant</h2>
+      <p class="paneel-omschrijving">
+        Vul het restaurant-ID in (dit staat ook in de link naar de zelfservice, bijv.
+        <code>zelfservice.html?restaurant=mijn-restaurant</code>). Bestaat het nog niet, dan wordt het aangemaakt.
+      </p>
+      <div class="veld-groep">
+        <label for="restaurant-id-veld">Restaurant-ID</label>
+        <input type="text" id="restaurant-id-veld" placeholder="bijv. restaurant-het-goedkoop">
+      </div>
+      <div class="veld-groep">
+        <label for="restaurant-naam-veld">Naam van het restaurant</label>
+        <input type="text" id="restaurant-naam-veld" placeholder="Restaurant Het Goedkoop">
+      </div>
+      <button class="hoofd-knop" id="restaurant-laden-knop">Laden / aanmaken</button>
+    </div>
+
+    <div id="beheer-blok" class="verborgen">
+
+      <!-- Zelfservice-link -->
+      <div class="paneel">
+        <h2>Link naar de zelfservice</h2>
+        <p class="paneel-omschrijving">Deel deze link (bijv. via een QR-code op tafel):</p>
+        <div class="veld-groep">
+          <input type="text" id="zelfservice-link-veld" readonly>
+        </div>
+        <button class="instellingen-secundair" id="link-kopieren-knop">Link kopiëren</button>
+      </div>
+
+      <!-- Tafels/banken -->
+      <div class="paneel">
+        <h2>Tafels &amp; banken</h2>
+        <p class="paneel-omschrijving">Dit zijn de plekken die gasten kunnen kiezen in de zelfservice.</p>
+        <div id="tafel-lijst"></div>
+        <div class="rij-2" style="margin-top:16px;">
+          <div class="veld-groep" style="margin-bottom:0;">
+            <label for="nieuwe-tafel-naam">Naam</label>
+            <input type="text" id="nieuwe-tafel-naam" placeholder="Tafel 4">
+          </div>
+          <div class="veld-groep" style="margin-bottom:0;">
+            <label for="nieuwe-tafel-type">Type</label>
+            <select id="nieuwe-tafel-type">
+              <option value="tafel">Tafel</option>
+              <option value="bank">Bank</option>
+            </select>
+          </div>
+        </div>
+        <button class="instellingen-secundair" id="tafel-toevoegen-knop">Tafel/bank toevoegen</button>
+      </div>
+
+      <!-- Producten -->
+      <div class="paneel">
+        <h2>Menu &amp; producten</h2>
+        <p class="paneel-omschrijving">
+          Voeg per product optioneel vaste opmerkingen toe (bijv. "Zonder ui", "Extra kaas").
+          Deze verschijnen alleen bij dit product in de zelfservice; gasten kunnen daarnaast altijd zelf iets typen.
+        </p>
+        <div id="product-lijst"></div>
+
+        <div class="veld-groep">
+          <label for="nieuw-product-naam">Productnaam</label>
+          <input type="text" id="nieuw-product-naam" placeholder="Cheeseburger">
+        </div>
+        <div class="rij-2">
+          <div class="veld-groep">
+            <label for="nieuw-product-prijs">Prijs (€)</label>
+            <input type="number" id="nieuw-product-prijs" step="0.01" min="0" placeholder="8.50">
+          </div>
+          <div class="veld-groep">
+            <label for="nieuw-product-categorie">Categorie</label>
+            <input type="text" id="nieuw-product-categorie" placeholder="Hoofdgerecht">
+          </div>
+        </div>
+        <div class="veld-groep">
+          <label for="nieuw-product-omschrijving">Omschrijving (optioneel)</label>
+          <input type="text" id="nieuw-product-omschrijving" placeholder="Met friet en salade">
+        </div>
+        <div class="veld-groep">
+          <label for="nieuw-product-opmerkingen">Vaste opmerkingen (optioneel, gescheiden door komma's)</label>
+          <input type="text" id="nieuw-product-opmerkingen" placeholder="Zonder ui, Extra kaas, Goed doorbakken">
+        </div>
+        <button class="instellingen-secundair" id="product-toevoegen-knop">Product toevoegen</button>
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/common.js"></script>
+<script src="js/instellingen.js"></script>
+
+</body>
+</html>
