@@ -183,20 +183,16 @@
 
     const ref = restaurantRef(restaurantId);
 
-    // Load restaurant metadata first.
+    // Metadata is helpful but must never block the tables/menu listeners.
     try {
       const snap = await ref.once('value');
-      if (!snap.exists()) {
-        hideLoader();
-        error('Restaurant niet gevonden', `Restaurant ${restaurantId} bestaat niet.`);
-        return;
+      if (snap.exists()) {
+        restaurant = snap.val() || restaurant || {};
+        $('restaurant-naam').textContent = restaurant.naam || restaurant.name || 'Zelfservice';
       }
-      restaurant = snap.val() || restaurant || {};
-      $('restaurant-naam').textContent = restaurant.naam || restaurant.name || 'Zelfservice';
     } catch (e) {
-      hideLoader();
-      error('Firebase-fout', 'Het restaurant kon niet worden geladen.', String(e));
-      return;
+      console.warn('Restaurant metadata unavailable; continuing with child nodes.', e);
+      $('restaurant-naam').textContent = 'Zelfservice';
     }
 
     // Tables: exact structure from the restaurant system:

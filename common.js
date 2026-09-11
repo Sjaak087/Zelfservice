@@ -15,6 +15,8 @@ function findFiveDigitCode() {
   });
   candidates.push(window.location.hash || '');
   candidates.push(window.location.pathname || '');
+  const segments = String(window.location.pathname || '').split('/').filter(Boolean);
+  if (segments.length) candidates.push(segments[segments.length - 1]);
   candidates.push(window.location.search || '');
   for (const raw of candidates) {
     const match = String(raw).match(/(^|[^0-9])([0-9]{5})(?![0-9])/);

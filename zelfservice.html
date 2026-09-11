@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Zelfservice</title>
-  <link rel="stylesheet" href="css/style.css">
+  
   <style>
     .diagnostiek{margin-top:18px;padding:12px 14px;border:1px dashed var(--lijn-sterk);border-radius:8px;color:var(--room-zacht);font-size:.8rem;white-space:pre-wrap;word-break:break-word}
     .verborgen{display:none!important}
@@ -79,10 +79,36 @@
   </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
-<script src="js/firebase-config.js"></script>
-<script src="js/common.js"></script>
-<script src="js/zelfservice.js"></script>
-</body>
-</html>
+<script>
+(function(){
+  function appBase(){
+    var p=location.pathname.split('/').filter(Boolean);
+    if (location.hostname.endsWith('.github.io')) return p.length ? '/' + p[0] + '/' : '/';
+    if (p.length>=2 && /^\d{5}$/.test(p[p.length-1])) return '/' + p[0] + '/';
+    if (p.length>=2 && p[p.length-1]==='') return p.length>1 ? '/' + p[0] + '/' : '/';
+    return p.length>=2 && !/\.[a-z0-9]+$/i.test(p[p.length-1]) ? '/' + p[0] + '/' : '/';
+  }
+  var base=appBase(); window.APP_BASE=base;
+  function add(tag,attrs){ var el=document.createElement(tag); Object.keys(attrs).forEach(function(k){el.setAttribute(k,attrs[k]);}); document.head.appendChild(el); return el; }
+  add('link',{rel:'stylesheet',href:base+'css/style.css'});
+  window.__loadScript=function(src){ return new Promise(function(resolve,reject){ var s=document.createElement('script'); s.src=base+src; s.onload=resolve; s.onerror=function(){reject(new Error('Kon script niet laden: '+base+src));}; document.head.appendChild(s); }); };
+  window.addEventListener('error',function(e){ var box=document.getElementById('diagnostiek')||document.getElementById('debug'); if(box){box.classList.remove('verborgen'); box.textContent='Fout: '+(e.error&&e.error.stack||e.message||'Onbekende fout');} });
+})();
+</script>
+<script>
+(async function(){
+  try {
+    await __loadScript('https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js');
+    await __loadScript('https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js');
+    await __loadScript('js/firebase-config.js');
+    await __loadScript('js/common.js');
+    await __loadScript('js/zelfservice.js');
+  } catch(e) {
+    var t=document.getElementById('status-titel'), p=document.getElementById('status-tekst'), d=document.getElementById('diagnostiek');
+    if(t) t.textContent='Zelfservice kan niet starten';
+    if(p) p.textContent='Een bestand of Firebase-script kon niet worden geladen.';
+    if(d){d.classList.remove('verborgen'); d.textContent=String(e&&e.stack||e);}
+  }
+})();
+</script>
+</body></html>
