@@ -4,118 +4,745 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Zelfservice</title>
-<link rel="stylesheet" href="css/style.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500&family=Archivo:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --nacht: #23180F;
+  --nacht-hoog: #2F2116;
+  --nacht-laag: #190F09;
+  --room: #F7EFE1;
+  --room-zacht: #C9B79E;
+  --mosterd: #F2A93B;
+  --mosterd-donker: #C6822A;
+  --paprika: #E1512B;
+  --paprika-donker: #B93F20;
+  --lijn: rgba(247, 239, 225, 0.14);
+  --lijn-sterk: rgba(247, 239, 225, 0.30);
+  --focus: #F2A93B;
+  --straal: 4px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--nacht);
+  background-image: radial-gradient(rgba(247, 239, 225, 0.035) 1px, transparent 1px);
+  background-size: 15px 15px;
+  color: var(--room);
+  font-family: 'Archivo', sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+h1, h2, h3, .titel {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+a { color: inherit; }
+
+button {
+  font-family: 'Archivo', sans-serif;
+  cursor: pointer;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Layout schaal ---------- */
+
+.scherm {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.kop {
+  padding: 26px 20px 18px;
+  border-bottom: 1px solid var(--lijn);
+  position: sticky;
+  top: 0;
+  background: var(--nacht);
+  z-index: 5;
+  overflow: hidden;
+}
+
+.kop::before {
+  content: '';
+  position: absolute;
+  top: -70px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 170px;
+  background: radial-gradient(circle, rgba(242, 169, 59, 0.20), transparent 72%);
+  pointer-events: none;
+}
+
+.kop-boven {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+}
+
+.restaurant-naam {
+  font-size: 1.7rem;
+}
+
+.restaurant-naam::after {
+  content: '';
+  display: block;
+  width: 44px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--paprika);
+  margin-top: 9px;
+}
+
+.route {
+  font-size: 0.8rem;
+  color: var(--room-zacht);
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.route .actief { color: var(--mosterd); font-weight: 600; }
+.route .scheiding { opacity: 0.45; }
+
+.inhoud {
+  flex: 1;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 26px 20px 150px;
+}
+
+.centreer-scherm {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+  gap: 14px;
+}
+
+.centreer-scherm .titel { font-size: 1.7rem; font-style: italic; }
+.centreer-scherm p { color: var(--room-zacht); max-width: 46ch; margin: 0; }
+
+.stap-titel {
+  font-size: 1.7rem;
+  font-style: italic;
+  margin-bottom: 16px;
+  color: var(--room);
+}
+
+.modaal-titel {
+  font-size: 1.3rem;
+}
+
+/* ---------- Tafel / bank keuze (bestelbon-stijl) ---------- */
+
+.tafel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+  counter-reset: tafeltelling;
+}
+
+.tafel-knop {
+  counter-increment: tafeltelling;
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
+  background: var(--nacht-hoog);
+  border: 1px solid var(--lijn);
+  border-radius: var(--straal);
+  color: var(--room);
+  padding: 0;
+  overflow: hidden;
+  text-align: left;
+  transition: border-color 0.15s ease, transform 0.1s ease;
+}
+
+.tafel-knop::before {
+  content: counter(tafeltelling, decimal-leading-zero);
+  grid-row: 1 / 3;
+  grid-column: 1;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mosterd);
+  color: var(--nacht-laag);
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  border-right: 2px dashed rgba(25, 15, 9, 0.4);
+}
+
+.tafel-knop .merk { display: none; }
+
+.tafel-knop .naam {
+  grid-column: 2;
+  grid-row: 1;
+  padding: 14px 14px 2px;
+  font-family: 'Fraunces', serif;
+  font-size: 1.1rem;
+}
+
+.tafel-knop .type {
+  grid-column: 2;
+  grid-row: 2;
+  padding: 0 14px 14px;
+  font-size: 0.76rem;
+  color: var(--room-zacht);
+  text-transform: lowercase;
+}
+
+.tafel-knop:hover { border-color: var(--lijn-sterk); }
+.tafel-knop:active { transform: scale(0.98); }
+
+/* ---------- Menu ---------- */
+
+.categorie-titel {
+  font-size: 1.05rem;
+  color: var(--mosterd);
+  margin: 32px 0 8px;
+  padding-bottom: 9px;
+  border-bottom: 1px dashed var(--lijn-sterk);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.categorie-titel::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  background: var(--paprika);
+  transform: rotate(45deg);
+}
+
+.categorie-titel:first-of-type { margin-top: 6px; }
+
+.product-rij {
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--lijn);
+  color: var(--room);
+  padding: 17px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  text-align: left;
+  position: relative;
+}
+
+.product-rij::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--paprika);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.product-rij:hover::before,
+.product-rij:focus-visible::before { opacity: 1; }
+
+.product-rij:hover .product-naam { color: var(--mosterd); }
+
+.product-naam {
+  font-family: 'Fraunces', serif;
+  font-size: 1.1rem;
+  transition: color 0.15s ease;
+}
+
+.product-omschrijving {
+  font-size: 0.85rem;
+  color: var(--room-zacht);
+  margin-top: 4px;
+  font-family: 'Archivo', sans-serif;
+}
+
+.product-prijs {
+  font-variant-numeric: tabular-nums;
+  color: var(--mosterd);
+  background: rgba(242, 169, 59, 0.12);
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* ---------- Modal (product kiezen) ---------- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 9, 5, 0.78);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 40;
+}
+
+@media (min-width: 640px) {
+  .overlay { align-items: center; }
+}
+
+.modaal {
+  background: var(--nacht-hoog);
+  width: 100%;
+  max-width: 520px;
+  max-height: 88vh;
+  overflow-y: auto;
+  border-radius: var(--straal) var(--straal) 0 0;
+  padding: 14px 22px 24px;
+  border-top: 1px solid var(--lijn-sterk);
+}
+
+@media (min-width: 640px) {
+  .modaal { border-radius: var(--straal); border: 1px solid var(--lijn-sterk); padding-top: 24px; }
+  .modaal .grip { display: none; }
+}
+
+.modaal .grip {
+  width: 42px;
+  height: 4px;
+  background: var(--lijn-sterk);
+  border-radius: 2px;
+  margin: 0 auto 18px;
+}
+
+.modaal-kop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.sluit-knop {
+  background: none;
+  border: none;
+  color: var(--room-zacht);
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 4px;
+}
+
+.veld-label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--room-zacht);
+  margin: 22px 0 10px;
+}
+
+.chip-rij {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.chip {
+  background: var(--nacht);
+  border: 1px dashed var(--lijn-sterk);
+  color: var(--room);
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 0.88rem;
+  transition: transform 0.1s ease;
+}
+
+.chip[aria-pressed="true"] {
+  background: var(--mosterd);
+  border-style: solid;
+  border-color: var(--mosterd);
+  color: var(--nacht-laag);
+  font-weight: 700;
+  transform: rotate(-1.5deg);
+}
+
+.opmerking-veld {
+  width: 100%;
+  background: var(--nacht);
+  border: 1px solid var(--lijn-sterk);
+  border-radius: var(--straal);
+  color: var(--room);
+  padding: 12px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+  min-height: 64px;
+}
+
+.opmerking-veld::placeholder { color: var(--room-zacht); }
+
+.aantal-rij {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.aantal-knop {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--lijn-sterk);
+  background: var(--nacht);
+  color: var(--room);
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aantal-getal {
+  font-variant-numeric: tabular-nums;
+  min-width: 1.5ch;
+  text-align: center;
+  font-family: 'Fraunces', serif;
+  font-size: 1.15rem;
+}
+
+.hoofd-knop {
+  width: 100%;
+  background: var(--mosterd);
+  color: var(--nacht-laag);
+  border: none;
+  border-radius: var(--straal);
+  padding: 15px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-top: 26px;
+  box-shadow: 0 3px 0 var(--mosterd-donker);
+  transition: background 0.15s ease, transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.hoofd-knop:hover { background: #EDB35B; }
+.hoofd-knop:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--mosterd-donker); }
+.hoofd-knop:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; transform: none; }
+
+.tekst-knop {
+  background: none;
+  border: none;
+  color: var(--room-zacht);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 8px 0;
+  font-size: 0.9rem;
+  width: 100%;
+  text-align: center;
+}
+
+/* ---------- Mandje balk (onderaan vast, als kassabon) ---------- */
+
+.mandje-balk {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--nacht-laag);
+  border-top: 2px dashed var(--lijn-sterk);
+  padding: 15px 20px calc(15px + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  z-index: 20;
+}
+
+.mandje-info { display: flex; flex-direction: column; gap: 2px; }
+.mandje-aantal { font-size: 0.78rem; color: var(--room-zacht); }
+.mandje-totaal { font-family: 'Fraunces', serif; font-size: 1.3rem; color: var(--mosterd); }
+
+.mandje-balk .hoofd-knop { width: auto; margin-top: 0; padding: 13px 26px; }
+
+/* ---------- Mandje overzicht ---------- */
+
+.mandje-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px dashed var(--lijn);
+}
+
+.mandje-item-naam { font-family: 'Fraunces', serif; }
+.mandje-item-opmerking { font-size: 0.82rem; color: var(--room-zacht); margin-top: 4px; }
+.mandje-item-verwijder {
+  background: none;
+  border: none;
+  color: var(--paprika);
+  font-size: 0.82rem;
+  text-decoration: underline;
+  padding: 0;
+  margin-top: 6px;
+}
+
+.mandje-item-prijs { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.totaal-rij {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 18px;
+  margin-top: 8px;
+  border-top: 1px solid var(--lijn-sterk);
+  font-family: 'Fraunces', serif;
+  font-size: 1.25rem;
+  color: var(--mosterd);
+}
+
+/* ---------- Bevestiging (stempel) ---------- */
+
+.vink {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 3px double var(--mosterd);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.7rem;
+  font-family: 'Fraunces', serif;
+  color: var(--mosterd);
+  transform: rotate(-7deg);
+}
+
+.melding {
+  font-size: 0.85rem;
+  padding: 11px 14px;
+  border-radius: var(--straal);
+  margin-bottom: 16px;
+}
+
+.melding.ok { background: rgba(242, 169, 61, 0.15); color: var(--mosterd); }
+.melding.fout { background: rgba(225, 81, 43, 0.18); color: #F0937A; }
+
+.leeg-staat {
+  color: var(--room-zacht);
+  font-size: 0.9rem;
+  padding: 8px 0;
+}
+
+.restaurant-link-lijst {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 380px;
+  margin-top: 8px;
+}
+
+.restaurant-link {
+  display: block;
+  background: var(--nacht-hoog);
+  border: 1px solid var(--lijn);
+  border-radius: var(--straal);
+  padding: 16px 18px;
+  font-family: 'Fraunces', serif;
+  font-size: 1.05rem;
+  text-decoration: none;
+  color: var(--room);
+}
+
+.restaurant-link:hover { border-color: var(--mosterd); color: var(--mosterd); }
+
+.verborgen { display: none !important; }
+
+/* Single-file deployment fixes */
+#error-scherm { margin-top: 16px; }
+.melding-groot { max-width: 720px; padding: 24px; border: 1px solid var(--lijn-sterk); background: var(--nacht-hoog); border-radius: 8px; }
+.melding-groot strong { display: block; margin-bottom: 8px; font-size: 1.1rem; }
+</style>
 </head>
 <body>
-
-<main class="scherm">
-
+<main class="scherm" id="app">
   <div class="kop">
-    <div class="kop-boven">
-      <div class="restaurant-naam" id="restaurant-naam">...</div>
-    </div>
+    <div class="kop-boven"><div class="restaurant-naam" id="restaurant-naam">Zelfservice</div></div>
     <div class="route" id="route">
-      <span data-stap="tafel">Tafel</span>
-      <span class="scheiding">→</span>
-      <span data-stap="menu">Menu</span>
-      <span class="scheiding">→</span>
+      <span data-stap="tafel">Tafel</span><span class="scheiding">→</span>
+      <span data-stap="menu">Menu</span><span class="scheiding">→</span>
       <span data-stap="klaar">Besteld</span>
     </div>
   </div>
-
   <div class="inhoud">
-
-    <!-- Laadscherm / foutscherm -->
     <div class="centreer-scherm" id="laad-scherm">
-      <p>Een moment, we laden het menu...</p>
+      <h1 class="titel" id="status-titel">Een moment...</h1>
+      <p id="status-tekst">We maken verbinding met Firebase…</p>
+      <div id="error-scherm" class="verborgen"></div>
+      <div id="restaurant-keuze" class="restaurant-link-lijst verborgen"></div>
     </div>
 
-    <!-- Stap 1: tafel of bank kiezen -->
     <section id="stap-tafel" class="verborgen">
       <h1 class="titel stap-titel">Waar zit je?</h1>
       <div class="tafel-grid" id="tafel-grid"></div>
     </section>
-
-    <!-- Stap 2: menu -->
-    <section id="stap-menu" class="verborgen">
-      <div id="menu-lijst"></div>
-    </section>
-
-    <!-- Stap 3: bevestiging -->
+    <section id="stap-menu" class="verborgen"><div id="menu-lijst"></div></section>
     <section id="stap-klaar" class="verborgen">
       <div class="centreer-scherm">
-        <div class="vink">✓</div>
-        <h1 class="titel">Bestelling geplaatst</h1>
+        <div class="vink">✓</div><h1 class="titel">Bestelling geplaatst</h1>
         <p id="klaar-tekst"></p>
         <button class="hoofd-knop" id="nieuwe-bestelling-knop" style="max-width:280px;">Nog iets bestellen</button>
       </div>
     </section>
-
   </div>
-
-  <!-- Mandje balk, alleen zichtbaar in het menu-scherm met items -->
   <div class="mandje-balk verborgen" id="mandje-balk">
-    <div class="mandje-info">
-      <span class="mandje-aantal" id="mandje-aantal">0 items</span>
-      <span class="mandje-totaal" id="mandje-totaal">€ 0,00</span>
-    </div>
+    <div class="mandje-info"><span class="mandje-aantal" id="mandje-aantal">0 items</span><span class="mandje-totaal" id="mandje-totaal">€ 0,00</span></div>
     <button class="hoofd-knop" id="mandje-openen-knop">Bekijk bestelling</button>
   </div>
-
 </main>
 
-<!-- Modal: product kiezen met opmerking -->
 <div class="overlay verborgen" id="product-overlay">
-  <div class="modaal">
-    <div class="grip"></div>
-    <div class="modaal-kop">
-      <div>
-        <div class="product-naam modaal-titel" id="modaal-naam"></div>
-        <div class="product-prijs" id="modaal-prijs"></div>
-      </div>
-      <button class="sluit-knop" id="modaal-sluiten" aria-label="Sluiten">×</button>
-    </div>
-
-    <div id="modaal-preset-blok" class="verborgen">
-      <label class="veld-label" id="modaal-preset-label">Opmerking</label>
-      <div class="chip-rij" id="modaal-preset-chips"></div>
-    </div>
-
+  <div class="modaal"><div class="grip"></div><div class="modaal-kop"><div><div class="product-naam modaal-titel" id="modaal-naam"></div><div class="product-prijs" id="modaal-prijs"></div></div><button class="sluit-knop" id="modaal-sluiten" aria-label="Sluiten">×</button></div>
+    <div id="modaal-preset-blok" class="verborgen"><label class="veld-label" id="modaal-preset-label">Opmerking</label><div class="chip-rij" id="modaal-preset-chips"></div></div>
     <label class="veld-label" for="modaal-opmerking-vrij">Eigen opmerking (optioneel)</label>
     <textarea class="opmerking-veld" id="modaal-opmerking-vrij" placeholder="Bijv. allergie, extra verzoek..."></textarea>
-
-    <div class="aantal-rij">
-      <button class="aantal-knop" id="modaal-min">−</button>
-      <span class="aantal-getal" id="modaal-aantal">1</span>
-      <button class="aantal-knop" id="modaal-plus">+</button>
-    </div>
-
+    <div class="aantal-rij"><button class="aantal-knop" id="modaal-min">−</button><span class="aantal-getal" id="modaal-aantal">1</span><button class="aantal-knop" id="modaal-plus">+</button></div>
     <button class="hoofd-knop" id="modaal-toevoegen">Toevoegen aan bestelling</button>
   </div>
 </div>
 
-<!-- Modal: mandje / bestelling overzicht -->
 <div class="overlay verborgen" id="mandje-overlay">
-  <div class="modaal">
-    <div class="grip"></div>
-    <div class="modaal-kop">
-      <div class="product-naam modaal-titel">Jouw bestelling</div>
-      <button class="sluit-knop" id="mandje-sluiten" aria-label="Sluiten">×</button>
-    </div>
-
-    <div id="mandje-items"></div>
-    <div class="totaal-rij"><span>Totaal</span><span id="mandje-modaal-totaal">€ 0,00</span></div>
-
-    <button class="hoofd-knop" id="bestelling-plaatsen-knop">Bestelling plaatsen</button>
-    <button class="tekst-knop" id="mandje-verder-knop">Verder bestellen</button>
+  <div class="modaal"><div class="grip"></div><div class="modaal-kop"><div class="product-naam modaal-titel">Jouw bestelling</div><button class="sluit-knop" id="mandje-sluiten" aria-label="Sluiten">×</button></div>
+    <div id="mandje-items"></div><div class="totaal-rij"><span>Totaal</span><span id="mandje-modaal-totaal">€ 0,00</span></div>
+    <button class="hoofd-knop" id="bestelling-plaatsen-knop">Bestelling plaatsen</button><button class="tekst-knop" id="mandje-verder-knop">Verder bestellen</button>
   </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
-<script src="js/firebase-config.js"></script>
-<script src="js/common.js"></script>
-<script src="js/zelfservice.js"></script>
+<script>
+// Vul hier je eigen Firebase-gegevens in.
+// Nadat je dit hebt ingevuld werkt de hele app (index.html, restaurant.html) op elk apparaat.
 
+const firebaseConfig = {
+  apiKey: "AIzaSyBVwx6eUdSkebGIK2J_NDwOD3rxTcIg1v4",
+  authDomain: "restaurant-het-goedkoop.firebaseapp.com",
+  databaseURL: "https://restaurant-het-goedkoop-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "restaurant-het-goedkoop",
+  storageBucket: "restaurant-het-goedkoop.firebasestorage.app",
+  messagingSenderId: "262921210117",
+  appId: "1:262921210117:web:4158692d91fd580cda4f6c"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+</script>
+<script>
+(function(){
+  'use strict';
+  var restaurantId = null, restaurant = null, gekozenTafel = null, mandje = [];
+  var actieveModalProduct = null, modalAantal = 1, modalGekozenPreset = null, restaurantLuisteraar = null, timeoutId = null;
+  var loaded = false;
+
+  function getParam(name){ return new URLSearchParams(location.search).get(name); }
+  function esc(t){ var d=document.createElement('div'); d.textContent=t==null?'':String(t); return d.innerHTML; }
+  function prijs(v){ return '€ ' + (Number(v)||0).toFixed(2).replace('.',','); }
+  function arr(o){ if(!o) return []; return Object.keys(o).map(function(id){ return Object.assign({id:id},o[id]||{}); }); }
+  function ref(){ return db.ref('restaurants/' + restaurantId); }
+  function setLoading(title,text){ document.getElementById('status-titel').textContent=title; document.getElementById('status-tekst').textContent=text||''; }
+  function showError(title,text){
+    setLoading(title,text); var box=document.getElementById('error-scherm'); box.className='melding-groot'; box.innerHTML='<strong>'+esc(title)+'</strong><span>'+esc(text)+'</span>';
+  }
+  function hideLoading(){ document.getElementById('laad-scherm').classList.add('verborgen'); }
+  function showStep(step){
+    ['tafel','menu','klaar'].forEach(function(n){ document.getElementById('stap-'+n).classList.toggle('verborgen', n!==step); });
+    document.querySelectorAll('.route [data-stap]').forEach(function(el){el.classList.toggle('actief',el.dataset.stap===step);});
+    document.getElementById('mandje-balk').classList.toggle('verborgen', !(step==='menu' && mandje.length));
+  }
+  function renderTafels(){
+    var grid=document.getElementById('tafel-grid'), tafels=arr(restaurant.tafels);
+    if(!tafels.length){grid.innerHTML='<p class="leeg-staat">Er zijn nog geen tafels ingesteld voor dit restaurant.</p>';return;}
+    grid.innerHTML=''; tafels.forEach(function(t){ var b=document.createElement('button'); b.className='tafel-knop'; b.innerHTML='<span class="merk"></span><span class="naam">'+esc(t.naam||t.id)+'</span><span class="type">'+esc(t.type||'tafel')+'</span>'; b.onclick=function(){gekozenTafel=t;renderMenu();showStep('menu');}; grid.appendChild(b); });
+  }
+  function renderMenu(){
+    var list=document.getElementById('menu-lijst'), products=arr(restaurant.producten), groepen={};
+    if(!products.length){list.innerHTML='<p class="leeg-staat">Er staan nog geen producten op het menu.</p>';return;}
+    products.forEach(function(p){var c=p.categorie||'Overig';(groepen[c]||(groepen[c]=[])).push(p);}); list.innerHTML='';
+    Object.keys(groepen).forEach(function(c){ var h=document.createElement('div');h.className='categorie-titel';h.textContent=c;list.appendChild(h); groepen[c].forEach(function(p){ var b=document.createElement('button');b.className='product-rij';b.innerHTML='<span><span class="product-naam">'+esc(p.naam||'')+'</span>'+(p.omschrijving?'<div class="product-omschrijving">'+esc(p.omschrijving)+'</div>':'')+'</span><span class="product-prijs">'+prijs(p.prijs)+'</span>';b.onclick=function(){openProduct(p);};list.appendChild(b);});});
+  }
+  function openProduct(p){
+    actieveModalProduct=p;modalAantal=1;modalGekozenPreset=null;
+    document.getElementById('modaal-naam').textContent=p.naam||'';document.getElementById('modaal-prijs').textContent=prijs(p.prijs);document.getElementById('modaal-opmerking-vrij').value='';document.getElementById('modaal-aantal').textContent='1';
+    var block=document.getElementById('modaal-preset-blok'), chips=document.getElementById('modaal-preset-chips'), presets=Array.isArray(p.opmerkingen)?p.opmerkingen.filter(Boolean):[];
+    if(!presets.length){block.classList.add('verborgen');}else{block.classList.remove('verborgen');chips.innerHTML='';presets.forEach(function(t){var c=document.createElement('button');c.type='button';c.className='chip';c.textContent=t;c.setAttribute('aria-pressed','false');c.onclick=function(){var same=modalGekozenPreset===t;modalGekozenPreset=same?null:t;chips.querySelectorAll('.chip').forEach(function(x){x.setAttribute('aria-pressed','false');});if(!same)c.setAttribute('aria-pressed','true');};chips.appendChild(c);});}
+    document.getElementById('product-overlay').classList.remove('verborgen');
+  }
+  function closeProduct(){document.getElementById('product-overlay').classList.add('verborgen');actieveModalProduct=null;}
+  function addCart(){ if(!actieveModalProduct)return;var delen=[],free=document.getElementById('modaal-opmerking-vrij').value.trim();if(modalGekozenPreset)delen.push(modalGekozenPreset);if(free)delen.push(free);mandje.push({productId:actieveModalProduct.id,naam:actieveModalProduct.naam||'',prijs:Number(actieveModalProduct.prijs)||0,opmerking:delen.join(' · '),aantal:modalAantal});closeProduct();updateCart(); }
+  function total(){return mandje.reduce(function(s,i){return s+i.prijs*i.aantal;},0);}
+  function count(){return mandje.reduce(function(s,i){return s+i.aantal;},0);}
+  function updateCart(){var n=count();document.getElementById('mandje-balk').classList.toggle('verborgen',n===0);document.getElementById('mandje-aantal').textContent=n+(n===1?' item':' items');document.getElementById('mandje-totaal').textContent=prijs(total());}
+  function openCart(){var el=document.getElementById('mandje-items');el.innerHTML='';if(!mandje.length)el.innerHTML='<p class="leeg-staat">Je bestelling is nog leeg.</p>';else mandje.forEach(function(i,idx){var row=document.createElement('div');row.className='mandje-item';row.innerHTML='<span><div class="mandje-item-naam">'+i.aantal+'× '+esc(i.naam)+'</div>'+(i.opmerking?'<div class="mandje-item-opmerking">'+esc(i.opmerking)+'</div>':'')+'<button class="mandje-item-verwijder">Verwijderen</button></span><span class="mandje-item-prijs">'+prijs(i.prijs*i.aantal)+'</span>';row.querySelector('button').onclick=function(){mandje.splice(idx,1);updateCart();openCart();};el.appendChild(row);});document.getElementById('mandje-modaal-totaal').textContent=prijs(total());document.getElementById('bestelling-plaatsen-knop').disabled=!mandje.length;document.getElementById('mandje-overlay').classList.remove('verborgen');}
+  function closeCart(){document.getElementById('mandje-overlay').classList.add('verborgen');}
+  async function placeOrder(){ if(!mandje.length)return;var b=document.getElementById('bestelling-plaatsen-knop');b.disabled=true;b.textContent='Bezig met bestellen…';var order={tafelId:gekozenTafel?gekozenTafel.id:null,tafelNaam:gekozenTafel?(gekozenTafel.naam||gekozenTafel.id):null,items:mandje.map(function(i){return{productId:i.productId,naam:i.naam,prijs:i.prijs,aantal:i.aantal,opmerking:i.opmerking||''};}),totaal:total(),status:'nieuw',tijdstip:firebase.database.ServerValue.TIMESTAMP};try{await ref().child('bestellingen').push(order);document.getElementById('klaar-tekst').textContent='Je bestelling is doorgestuurd naar de keuken voor '+(gekozenTafel?(gekozenTafel.naam||gekozenTafel.id):'je plek')+'.';mandje=[];updateCart();closeCart();showStep('klaar');}catch(e){console.error(e);alert('De bestelling kon niet worden verstuurd. Controleer de Firebase-regels.');}finally{b.disabled=false;b.textContent='Bestelling plaatsen';}}
+  function wire(){
+    document.getElementById('modaal-sluiten').onclick=closeProduct;document.getElementById('product-overlay').onclick=function(e){if(e.target.id==='product-overlay')closeProduct;};
+    document.getElementById('modaal-min').onclick=function(){modalAantal=Math.max(1,modalAantal-1);document.getElementById('modaal-aantal').textContent=modalAantal;};document.getElementById('modaal-plus').onclick=function(){modalAantal++;document.getElementById('modaal-aantal').textContent=modalAantal;};document.getElementById('modaal-toevoegen').onclick=addCart;
+    document.getElementById('mandje-openen-knop').onclick=openCart;document.getElementById('mandje-sluiten').onclick=closeCart;document.getElementById('mandje-verder-knop').onclick=closeCart;document.getElementById('mandje-overlay').onclick=function(e){if(e.target.id==='mandje-overlay')closeCart;};document.getElementById('bestelling-plaatsen-knop').onclick=placeOrder;
+    document.getElementById('nieuwe-bestelling-knop').onclick=function(){renderMenu();showStep('menu');};
+  }
+  function listenRestaurant(){
+    if(!restaurantId){
+      setLoading('Restaurant kiezen','Restaurants worden rechtstreeks uit Firebase geladen…');
+      db.ref('restaurants').once('value').then(function(s){var list=document.getElementById('restaurant-keuze'),rs=arr(s.val());if(!rs.length){showError('Geen restaurants gevonden','Er staat nog geen restaurant onder restaurants/ in Firebase.');return;}document.getElementById('status-titel').textContent='Kies een restaurant';document.getElementById('status-tekst').textContent='';list.classList.remove('verborgen');list.innerHTML='';rs.forEach(function(r){var a=document.createElement('a');a.className='restaurant-link';a.href='?restaurant='+encodeURIComponent(r.id);a.textContent=r.naam||r.id;list.appendChild(a);});}).catch(function(e){console.error(e);showError('Firebase kan niet worden gelezen','Controleer de Realtime Database-regels en de database-URL.');});
+      return;
+    }
+    setLoading('Een moment…','Restaurantgegevens worden rechtstreeks uit Firebase geladen…');
+    restaurantLuisteraar=ref();
+    timeoutId=setTimeout(function(){if(!loaded)showError('Verbinden met Firebase lukt niet','De website wachtte te lang op Firebase. Controleer de internetverbinding en vooral de Realtime Database Rules.');},8000);
+    restaurantLuisteraar.on('value',function(s){loaded=true;clearTimeout(timeoutId);if(!s.exists()){showError('Restaurant niet gevonden','Het restaurant-ID in deze link bestaat niet onder restaurants/.');return;}restaurant=s.val();document.getElementById('restaurant-naam').textContent=restaurant.naam||'Zelfservice';hideLoading();if(!gekozenTafel){renderTafels();showStep('tafel');}else{renderMenu();showStep('menu');}},function(e){console.error(e);loaded=true;clearTimeout(timeoutId);showError('Firebase-fout','Kan de gegevens van dit restaurant niet lezen. Controleer de Realtime Database Rules.');});
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    try{
+      if(typeof firebase==='undefined' || typeof db==='undefined'){showError('Firebase SDK niet geladen','De Firebase-scripts konden niet worden geladen. Controleer de internetverbinding.');return;}
+      restaurantId=getParam('restaurant');wire();listenRestaurant();
+    }catch(e){console.error(e);showError('Startfout',e&&e.message?e.message:String(e));}
+  });
+  window.addEventListener('beforeunload',function(){if(restaurantLuisteraar)restaurantLuisteraar.off();if(timeoutId)clearTimeout(timeoutId);});
+})();
+</script>
 </body>
 </html>
