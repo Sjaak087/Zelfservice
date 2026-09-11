@@ -677,7 +677,20 @@ const db = firebase.database();
   var actieveModalProduct = null, modalAantal = 1, modalGekozenPreset = null, restaurantLuisteraar = null, timeoutId = null;
   var loaded = false;
 
-  function getParam(name){ return new URLSearchParams(location.search).get(name); }
+  function getRestaurantIdFromLink(){
+    var params = new URLSearchParams(location.search);
+    var values = [params.get('restaurant'), params.get('restaurantId'), params.get('restaurant_id'), params.get('r')];
+    for (var i=0;i<values.length;i++){ if(values[i] && values[i].trim()) return values[i].trim(); }
+    var hash = new URLSearchParams((location.hash||'').replace(/^#/,''));
+    var hashKeys = ['restaurant','restaurantId','restaurant_id','r'];
+    for (var j=0;j<hashKeys.length;j++){ var hv=hash.get(hashKeys[j]); if(hv && hv.trim()) return hv.trim(); }
+    var parts = location.pathname.split('/').filter(Boolean);
+    for (var k=0;k<parts.length-1;k++){
+      var marker=parts[k].toLowerCase();
+      if(marker==='restaurant' || marker==='restaurants' || marker==='zelfservice' || marker==='zelfservice.html') return decodeURIComponent(parts[k+1]);
+    }
+    return null;
+  }
   function esc(t){ var d=document.createElement('div'); d.textContent=t==null?'':String(t); return d.innerHTML; }
   function prijs(v){ return '€ ' + (Number(v)||0).toFixed(2).replace('.',','); }
   function arr(o){ if(!o) return []; return Object.keys(o).map(function(id){ return Object.assign({id:id},o[id]||{}); }); }
@@ -719,26 +732,25 @@ const db = firebase.database();
   function closeCart(){document.getElementById('mandje-overlay').classList.add('verborgen');}
   async function placeOrder(){ if(!mandje.length)return;var b=document.getElementById('bestelling-plaatsen-knop');b.disabled=true;b.textContent='Bezig met bestellen…';var order={tafelId:gekozenTafel?gekozenTafel.id:null,tafelNaam:gekozenTafel?(gekozenTafel.naam||gekozenTafel.id):null,items:mandje.map(function(i){return{productId:i.productId,naam:i.naam,prijs:i.prijs,aantal:i.aantal,opmerking:i.opmerking||''};}),totaal:total(),status:'nieuw',tijdstip:firebase.database.ServerValue.TIMESTAMP};try{await ref().child('bestellingen').push(order);document.getElementById('klaar-tekst').textContent='Je bestelling is doorgestuurd naar de keuken voor '+(gekozenTafel?(gekozenTafel.naam||gekozenTafel.id):'je plek')+'.';mandje=[];updateCart();closeCart();showStep('klaar');}catch(e){console.error(e);alert('De bestelling kon niet worden verstuurd. Controleer de Firebase-regels.');}finally{b.disabled=false;b.textContent='Bestelling plaatsen';}}
   function wire(){
-    document.getElementById('modaal-sluiten').onclick=closeProduct;document.getElementById('product-overlay').onclick=function(e){if(e.target.id==='product-overlay')closeProduct;};
+    document.getElementById('modaal-sluiten').onclick=closeProduct;document.getElementById('product-overlay').onclick=function(e){if(e.target.id==='product-overlay')closeProduct();};
     document.getElementById('modaal-min').onclick=function(){modalAantal=Math.max(1,modalAantal-1);document.getElementById('modaal-aantal').textContent=modalAantal;};document.getElementById('modaal-plus').onclick=function(){modalAantal++;document.getElementById('modaal-aantal').textContent=modalAantal;};document.getElementById('modaal-toevoegen').onclick=addCart;
-    document.getElementById('mandje-openen-knop').onclick=openCart;document.getElementById('mandje-sluiten').onclick=closeCart;document.getElementById('mandje-verder-knop').onclick=closeCart;document.getElementById('mandje-overlay').onclick=function(e){if(e.target.id==='mandje-overlay')closeCart;};document.getElementById('bestelling-plaatsen-knop').onclick=placeOrder;
+    document.getElementById('mandje-openen-knop').onclick=openCart;document.getElementById('mandje-sluiten').onclick=closeCart;document.getElementById('mandje-verder-knop').onclick=closeCart;document.getElementById('mandje-overlay').onclick=function(e){if(e.target.id==='mandje-overlay')closeCart();};document.getElementById('bestelling-plaatsen-knop').onclick=placeOrder;
     document.getElementById('nieuwe-bestelling-knop').onclick=function(){renderMenu();showStep('menu');};
   }
   function listenRestaurant(){
     if(!restaurantId){
-      setLoading('Restaurant kiezen','Restaurants worden rechtstreeks uit Firebase geladen…');
-      db.ref('restaurants').once('value').then(function(s){var list=document.getElementById('restaurant-keuze'),rs=arr(s.val());if(!rs.length){showError('Geen restaurants gevonden','Er staat nog geen restaurant onder restaurants/ in Firebase.');return;}document.getElementById('status-titel').textContent='Kies een restaurant';document.getElementById('status-tekst').textContent='';list.classList.remove('verborgen');list.innerHTML='';rs.forEach(function(r){var a=document.createElement('a');a.className='restaurant-link';a.href='?restaurant='+encodeURIComponent(r.id);a.textContent=r.naam||r.id;list.appendChild(a);});}).catch(function(e){console.error(e);showError('Firebase kan niet worden gelezen','Controleer de Realtime Database-regels en de database-URL.');});
+      showError('Restaurant ontbreekt in deze QR-link','Deze zelfservice kiest niet meer zelf een restaurant. De QR-code/link moet het restaurant-ID meegeven.');
       return;
     }
     setLoading('Een moment…','Restaurantgegevens worden rechtstreeks uit Firebase geladen…');
     restaurantLuisteraar=ref();
-    timeoutId=setTimeout(function(){if(!loaded)showError('Verbinden met Firebase lukt niet','De website wachtte te lang op Firebase. Controleer de internetverbinding en vooral de Realtime Database Rules.');},8000);
-    restaurantLuisteraar.on('value',function(s){loaded=true;clearTimeout(timeoutId);if(!s.exists()){showError('Restaurant niet gevonden','Het restaurant-ID in deze link bestaat niet onder restaurants/.');return;}restaurant=s.val();document.getElementById('restaurant-naam').textContent=restaurant.naam||'Zelfservice';hideLoading();if(!gekozenTafel){renderTafels();showStep('tafel');}else{renderMenu();showStep('menu');}},function(e){console.error(e);loaded=true;clearTimeout(timeoutId);showError('Firebase-fout','Kan de gegevens van dit restaurant niet lezen. Controleer de Realtime Database Rules.');});
+    timeoutId=setTimeout(function(){if(!loaded)showError('Verbinden met Firebase lukt niet','De website wachtte te lang op Firebase. Controleer de internetverbinding en de Realtime Database Rules.');},8000);
+    restaurantLuisteraar.on('value',function(s){loaded=true;clearTimeout(timeoutId);if(!s.exists()){showError('Restaurant niet gevonden','Het restaurant-ID in deze QR-link bestaat niet onder restaurants/.');return;}restaurant=s.val();document.getElementById('restaurant-naam').textContent=restaurant.naam||'Zelfservice';hideLoading();if(!gekozenTafel){renderTafels();showStep('tafel');}else{renderMenu();showStep('menu');}},function(e){console.error(e);loaded=true;clearTimeout(timeoutId);showError('Firebase-fout','Kan de gegevens van dit restaurant niet lezen. Controleer de Realtime Database Rules.');});
   }
   document.addEventListener('DOMContentLoaded',function(){
     try{
       if(typeof firebase==='undefined' || typeof db==='undefined'){showError('Firebase SDK niet geladen','De Firebase-scripts konden niet worden geladen. Controleer de internetverbinding.');return;}
-      restaurantId=getParam('restaurant');wire();listenRestaurant();
+      restaurantId=getRestaurantIdFromLink();wire();listenRestaurant();
     }catch(e){console.error(e);showError('Startfout',e&&e.message?e.message:String(e));}
   });
   window.addEventListener('beforeunload',function(){if(restaurantLuisteraar)restaurantLuisteraar.off();if(timeoutId)clearTimeout(timeoutId);});
