@@ -677,8 +677,8 @@ const db = firebase.database();
   'use strict';
   var restaurantId = null, restaurant = null, gekozenTafel = null, mandje = [];
   var actieveModalProduct = null, modalAantal = 1, modalGekozenPreset = null;
-  var restaurantLuisteraar = null, codesLuisteraar = null, timeoutId = null;
-  var loaded = false, resolvedCode = null;
+  var restaurantLuisteraar = null, tablesLuisteraar = null, productsLuisteraar = null, codesLuisteraar = null, timeoutId = null;
+  var loaded = false, resolvedCode = null, liveTables = null, liveProducts = null;
 
   function cleanCode(v){
     try { v = decodeURIComponent(String(v || '')); } catch(e) { v = String(v || ''); }
@@ -814,21 +814,44 @@ const db = firebase.database();
     loaded=true;
     clearTimeout(timeoutId);
     if(restaurantLuisteraar) restaurantLuisteraar.off();
+    if(tablesLuisteraar) tablesLuisteraar.off();
+    if(productsLuisteraar) productsLuisteraar.off();
+    liveTables=null; liveProducts=null;
     setLoading('Een moment…','Restaurantgegevens worden geladen…');
+
     restaurantLuisteraar=restaurantRef();
     restaurantLuisteraar.on('value',function(s){
       if(!s.exists()){
         showError('Restaurant niet gevonden','De opgegeven restaurantcode bestaat niet in Firebase.');
         return;
       }
-      restaurant=s.val();
-      document.getElementById('restaurant-naam').textContent=restaurant.naam||'Zelfservice';
+      restaurant=s.val() || {};
+      document.getElementById('restaurant-naam').textContent=restaurant.naam||restaurant.name||'Zelfservice';
       hideLoading();
       if(!gekozenTafel){renderTafels();showStep('tafel');}
       else{renderMenu();showStep('menu');}
     },function(e){
-      console.error(e);
-      showError('Firebase-fout','Kan de gegevens van dit restaurant niet lezen. Controleer de Realtime Database Rules.');
+      console.error('restaurant listener',e);
+    });
+
+    // BELANGRIJK: lees de twee collecties rechtstreeks uit Firebase.
+    // Dit sluit precies aan op de structuur: floorplan -> tables en products.
+    tablesLuisteraar=restaurantRef().child('floorplan').child('tables');
+    tablesLuisteraar.on('value',function(s){
+      liveTables=s.exists()?s.val():{};
+      if(loaded && !gekozenTafel){ renderTafels(); }
+    },function(e){
+      console.error('tables listener',e);
+      var grid=document.getElementById('tafel-grid');
+      if(grid) grid.innerHTML='<p class="leeg-staat">De tafels konden niet uit Firebase worden geladen.</p>';
+    });
+
+    productsLuisteraar=restaurantRef().child('products');
+    productsLuisteraar.on('value',function(s){
+      liveProducts=s.exists()?s.val():{};
+      if(loaded && gekozenTafel){ renderMenu(); }
+    },function(e){
+      console.error('products listener',e);
     });
     return true;
   }
@@ -861,17 +884,17 @@ const db = firebase.database();
   }
 
   function extractTablesFromFloorplan(){
-    // Firebase-structuur: restaurants/{restaurantId}/floorplan/tables/{rareTafelCode}.
-    // De sleutel onder tables is de unieke tafelcode. De waarde bevat de tafel-info.
-    // We tonen standaard iedere entry onder tables; alleen expliciet als bank/stoel gemarkeerde
-    // objecten worden weggelaten. Zo verdwijnen tafels niet omdat hun interne naam een code is.
-    var fp=restaurant && restaurant.floorplan;
-    if(!fp || typeof fp!=='object') return [];
-
-    var node=fp.tables || fp.Tables || fp.tafels || fp.Tafels;
+    // Lees de tafels rechtstreeks uit restaurants/{restaurantId}/floorplan/tables.
+    // liveTables wordt door de aparte Firebase-listener gevuld; dit voorkomt dat
+    // een geneste snapshot of security rule op het restaurant-object de tafels weglaat.
+    var node = liveTables;
+    if(node == null){
+      var fp=restaurant && restaurant.floorplan;
+      if(!fp || typeof fp!=='object') return [];
+      node=fp.tables || fp.Tables || fp.tafels || fp.Tafels;
+    }
     var list=valuesFromNode(node);
     if(!list.length) return [];
-
     return list.filter(function(t){
       if(!t || typeof t!=='object') return false;
       var type=String(t.type||t.kind||t.soort||t.objectType||'').toLowerCase();
@@ -905,13 +928,12 @@ const db = firebase.database();
   }
 
   function extractProducts(){
-    // Producten staan in /restaurants/{id}/products.
-    // Hou /producten als compatibiliteit met oudere data.
-    var node=restaurant && (restaurant.products || restaurant.producten || restaurant.menu);
+    // Lees producten rechtstreeks uit restaurants/{restaurantId}/products.
+    var node = liveProducts;
+    if(node == null) node = restaurant && (restaurant.products || restaurant.producten || restaurant.menu);
     if(!node) return [];
     var list=valuesFromNode(node);
-    // Soms zit de collectie nog één niveau dieper.
-    if(list.length===1 && list[0] && typeof list[0].products==='object') return valuesFromNode(list[0].products);
+    if(list.length===1 && list[0] && list[0].products && typeof list[0].products==='object') return valuesFromNode(list[0].products);
     return list;
   }
 
@@ -1008,7 +1030,7 @@ const db = firebase.database();
       wire();listenRestaurant();
     }catch(e){console.error(e);showError('Startfout',e&&e.message?e.message:String(e));}
   });
-  window.addEventListener('beforeunload',function(){if(restaurantLuisteraar)restaurantLuisteraar.off();if(codesLuisteraar)codesRef().off('value', codesLuisteraar);if(timeoutId)clearTimeout(timeoutId);});
+  window.addEventListener('beforeunload',function(){if(restaurantLuisteraar)restaurantLuisteraar.off();if(tablesLuisteraar)tablesLuisteraar.off();if(productsLuisteraar)productsLuisteraar.off();if(codesLuisteraar)codesRef().off('value', codesLuisteraar);if(timeoutId)clearTimeout(timeoutId);});
 })();
 </script>
 </body>
