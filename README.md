@@ -3,20 +3,20 @@
 Een kant-en-klare website (puur HTML/CSS/JS, geen build-tools nodig) die je op
 GitHub Pages kunt zetten. Gasten openen de link van hún restaurant, het systeem
 herkent automatisch welk restaurant dat is, en ze kunnen daarna hun tafel of
-bank kiezen en producten bestellen — inclusief opmerkingen.
+bank kiezen en producten bestellen — inclusief opmerkingen. Tafels en
+producten haalt de site rechtstreeks uit Firebase; je beheert ze in de
+Firebase Console (zie hieronder), er zit geen aparte beheerpagina in de site.
 
 ## Bestanden
 
 ```
-index.html          Startpunt: herkent het restaurant uit de link en stuurt door
-zelfservice.html     De bestelflow zelf (tafel kiezen -> menu -> bestellen)
-instellingen.html    Beheerpagina: tafels/banken en producten instellen
-css/style.css        Alle opmaak
-js/firebase-config.js  Jouw Firebase-gegevens (al ingevuld)
-js/common.js          Gedeelde hulpfuncties
-js/index.js            Logica voor index.html
-js/zelfservice.js      Logica voor zelfservice.html
-js/instellingen.js     Logica voor instellingen.html
+index.html             Startpunt: herkent het restaurant uit de link en stuurt door
+zelfservice.html        De bestelflow zelf (tafel kiezen -> menu -> bestellen)
+css/style.css            Alle opmaak
+js/firebase-config.js     Jouw Firebase-gegevens (al ingevuld)
+js/common.js               Gedeelde hulpfuncties
+js/index.js                 Logica voor index.html
+js/zelfservice.js           Logica voor zelfservice.html
 ```
 
 ## Hoe de restaurant-herkenning werkt
@@ -46,6 +46,9 @@ sneller.
 
 ## Databasestructuur (Firebase Realtime Database)
 
+De site leest dit rechtstreeks uit Firebase, dus zo moeten de gegevens erin
+staan:
+
 ```
 restaurants/
   restaurant-het-goedkoop/
@@ -74,43 +77,43 @@ restaurants/
       }
 ```
 
-- **`opmerkingen`** op een product zijn de vaste keuzes die je in
-  **instellingen.html** instelt (bijv. "Zonder ui"). Ze verschijnen in de
-  zelfservice alleen bij producten waar ze daadwerkelijk zijn ingesteld — een
-  product zonder `opmerkingen` toont dat blok gewoon niet. Daarnaast kan de
-  gast altijd zelf iets vrij typen; beide worden gecombineerd opgeslagen in
-  `items[].opmerking`.
+- **`opmerkingen`** op een product zijn de vaste keuzes (bijv. "Zonder ui").
+  Ze verschijnen in de zelfservice alleen bij producten waar dit veld
+  daadwerkelijk aanwezig is — een product zonder `opmerkingen` toont dat blok
+  gewoon niet. Daarnaast kan de gast altijd zelf iets vrij typen; beide worden
+  gecombineerd opgeslagen in `items[].opmerking`.
 - **`bestellingen`** is precies de plek waar jouw keukensysteem naar kan
   luisteren (bijv. met `db.ref('restaurants/ID/bestellingen').on('child_added', ...)`).
   Deze website schrijft alleen weg naar dat pad — verder hoeft de zelfservice
   daar niets mee te doen, zoals gevraagd.
 
-## Beheer: restaurant, tafels en producten instellen
+## Restaurant, tafels en producten toevoegen (via Firebase Console)
 
-Open `instellingen.html` (evt. met `?restaurant=restaurant-het-goedkoop` erbij
-zodat het meteen invult):
+1. Open de [Firebase Console](https://console.firebase.google.com/) →
+   je project (`restaurant-het-goedkoop`) → **Realtime Database**.
+2. Maak onder `restaurants` een nieuw kind aan met het restaurant-ID dat je in
+   de link wilt gebruiken, bijv. `restaurant-het-goedkoop`, met daarin een
+   veld `naam`.
+3. Voeg daaronder `tafels` toe: voor elke tafel/bank een nieuw kind met
+   `naam` (bijv. "Tafel 4") en `type` (`tafel` of `bank`).
+4. Voeg daaronder `producten` toe: voor elk product een nieuw kind met
+   `naam`, `prijs`, `categorie`, optioneel `omschrijving`, en optioneel
+   `opmerkingen` als lijst van teksten.
+5. De link naar de zelfservice van dat restaurant is dan:
+   `zelfservice.html?restaurant=restaurant-het-goedkoop`.
 
-1. Vul het restaurant-ID en de naam in en klik op **Laden / aanmaken**. Bestaat
-   het ID nog niet in Firebase, dan wordt het automatisch aangemaakt.
-2. Voeg tafels/banken toe onder **Tafels & banken**.
-3. Voeg producten toe onder **Menu & producten**, met optioneel vaste
-   opmerkingen (komma-gescheiden).
-4. Bovenaan bij **Link naar de zelfservice** vind je de kant-en-klare link die
-   je kunt delen of in een QR-code kunt zetten.
-
-Deze pagina is bewust simpel gehouden (geen login) zodat je snel aan de slag
-kunt. Zie de opmerking hieronder over toegang als je dit met meerdere mensen
-of publiek gebruikt.
+Je kunt dit ook sneller invoeren via de **Import JSON**-knop in de Firebase
+Console (rechtsboven bij Realtime Database), waarmee je in één keer een heel
+restaurant met tafels en producten kunt plakken volgens de structuur hierboven.
 
 ## Firebase-toegangsregels (belangrijk)
 
 Met de meegeleverde `firebaseConfig` kan *iedereen die de website bezoekt* bij
 de database. Voor een eerste test is dat prima, maar zet voordat je live
-gaat op zijn minst regels die schrijven naar `bestellingen` toestaan, maar
-`tafels`/`producten` alleen laten wijzigen door wie de beheerpagina mag
-gebruiken (bijv. met Firebase Authentication) of houd die instellingen alvast
-alleen bij jezelf. Een eenvoudig startpunt in de Firebase-console onder
-**Realtime Database → Rules**:
+gaat op zijn minst regels die schrijven naar `bestellingen` toestaan, en
+`tafels`/`producten` alleen laten lezen (niet schrijven) vanaf de website —
+die beheer je toch al zelf via de Console. Een eenvoudig startpunt in de
+Firebase-console onder **Realtime Database → Rules**:
 
 ```json
 {
@@ -129,8 +132,8 @@ alleen bij jezelf. Een eenvoudig startpunt in de Firebase-console onder
 }
 ```
 
-Pas dit aan naar jouw situatie (bijvoorbeeld strenger, of met authenticatie
-voor `instellingen.html`).
+Pas dit aan naar jouw situatie (bijvoorbeeld strenger op leesrechten, of met
+authenticatie als je het beheer verder wilt afschermen).
 
 ## Publiceren op GitHub Pages
 
@@ -145,9 +148,6 @@ voor `instellingen.html`).
 
 ## Kanttekeningen
 
-- Er is geen inlog op `instellingen.html` — iedereen met de link kan tafels en
-  producten aanpassen. Voeg gerust een wachtwoordscherm of Firebase
-  Authentication toe als dat nodig is.
 - De keukenkant (het systeem dat `bestellingen` uitleest en verwerkt) valt
   buiten deze levering, zoals gevraagd — deze site schrijft alleen de juiste
   gegevens naar het juiste pad.

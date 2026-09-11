@@ -32,7 +32,7 @@
 
     <!-- Stap 1: tafel of bank kiezen -->
     <section id="stap-tafel" class="verborgen">
-      <h1 class="titel" style="font-size:1.4rem; margin-bottom:14px;">Waar zit je?</h1>
+      <h1 class="titel stap-titel">Waar zit je?</h1>
       <div class="tafel-grid" id="tafel-grid"></div>
     </section>
 
@@ -67,9 +67,10 @@
 <!-- Modal: product kiezen met opmerking -->
 <div class="overlay verborgen" id="product-overlay">
   <div class="modaal">
+    <div class="grip"></div>
     <div class="modaal-kop">
       <div>
-        <div class="product-naam" style="font-size:1.3rem;" id="modaal-naam"></div>
+        <div class="product-naam modaal-titel" id="modaal-naam"></div>
         <div class="product-prijs" id="modaal-prijs"></div>
       </div>
       <button class="sluit-knop" id="modaal-sluiten" aria-label="Sluiten">×</button>
@@ -96,8 +97,9 @@
 <!-- Modal: mandje / bestelling overzicht -->
 <div class="overlay verborgen" id="mandje-overlay">
   <div class="modaal">
+    <div class="grip"></div>
     <div class="modaal-kop">
-      <div class="product-naam" style="font-size:1.3rem;">Jouw bestelling</div>
+      <div class="product-naam modaal-titel">Jouw bestelling</div>
       <button class="sluit-knop" id="mandje-sluiten" aria-label="Sluiten">×</button>
     </div>
 
