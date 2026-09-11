@@ -1,28 +1,12 @@
-# Restaurant Zelfservice
+# Restaurant zelfservice
 
-De zelfservice vraagt de gebruiker nooit om een restaurant te kiezen.
+De zelfservice gebruikt de 5-cijferige `selfservicecode` die per restaurant onder `restaurants` in Firebase staat.
 
-De QR-code/link van het andere systeem moet een **join code** meegeven. De app zoekt die code op in de Firebase Realtime Database onder:
+Werking:
+1. QR/link opent deze pagina.
+2. De pagina haalt de 5-cijferige code uit query/hash/path/URL.
+3. In `restaurants` wordt gezocht naar `selfservicecode` (ook varianten van de veldnaam).
+4. Het gevonden restaurant wordt live geladen uit `restaurants/<restaurantId>`.
+5. Producten, tafels en bestellingen komen rechtstreeks uit Firebase.
 
-`restaurantCodes`
-
-Daarna bepaalt de app automatisch welk restaurant bij die code hoort en leest de gegevens live uit:
-
-`restaurants/<restaurantId>`
-
-Ondersteunde join-code URL-vormen zijn onder andere:
-
-- `https://jouwdomein.nl/zelfservice?joinCode=ABC123`
-- `https://jouwdomein.nl/zelfservice?code=ABC123`
-- `https://jouwdomein.nl/zelfservice?restaurantCode=ABC123`
-- `https://jouwdomein.nl/zelfservice/ABC123`
-- `https://jouwdomein.nl/zelfservice#ABC123`
-
-De lookup is bewust flexibel opgezet zodat deze Firebase-structuren kunnen worden gebruikt:
-
-- `restaurantCodes/ABC123 = restaurantId`
-- `restaurantCodes/restaurantId = ABC123`
-- `restaurantCodes/ABC123 = { restaurantId: "..." }`
-- `restaurantCodes/restaurantId = { joinCode: "ABC123" }`
-
-Producten, tafels, restaurantgegevens en bestellingen blijven rechtstreeks aan Firebase gekoppeld.
+Een oude `restaurantCodes`-mapping blijft als fallback beschikbaar.

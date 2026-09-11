@@ -704,6 +704,11 @@ const db = firebase.database();
       if(!hashRaw.includes('=')) return cleanCode(hashRaw);
     }
 
+    // De zelfservice van het restaurantsysteem gebruikt een 5-cijferige selfservicecode.
+    var fullUrl = String(location.href || '');
+    var five = fullUrl.match(/(?:^|[^0-9])(\d{5})(?:[^0-9]|$)/);
+    if(five && five[1]) return five[1];
+
     var parts = location.pathname.split('/').filter(Boolean);
     var markers=['join','joincode','code','restaurant','restaurants','zelfservice','zelfservice.html','qr'];
     for (var k=0;k<parts.length-1;k++){
@@ -794,8 +799,8 @@ const db = firebase.database();
       var key=keys[i], item=data[key];
       if(norm(key)===target) return key;
       if(item && typeof item==='object'){
-        var naam=cleanCode(item.naam || item.name || item.restaurantNaam || item.restaurantName);
-        if(naam && norm(naam)===target) return key;
+        var sc=cleanCode(item.selfservicecode || item.selfServiceCode || item.selfserviceCode || item.self_service_code || item["selfservice-code"]);
+        if(sc && norm(sc)===target) return key;
       }
     }
     return null;
@@ -879,7 +884,7 @@ const db = firebase.database();
       if(!loaded) showError('Verbinden met Firebase lukt niet','Het restaurant kon niet op tijd worden opgezocht. Controleer de internetverbinding en de Firebase-regels.');
     },10000);
 
-    // 1. Eerst rechtstreeks zoeken in restaurants op Firebase-key of restaurantnaam.
+    // Zoek rechtstreeks in restaurants op de 5-cijferige selfservicecode.
     restaurantsRef().once('value').then(function(snapshot){
       var directId=findRestaurantByCode(snapshot.val(),resolvedCode);
       if(directId){
@@ -887,7 +892,7 @@ const db = firebase.database();
         return;
       }
 
-      // 2. Daarna restaurantCodes proberen als fallback voor bestaande QR-codes.
+      // Alleen als fallback voor oudere QR-links: restaurantCodes.
       return codesRef().once('value').then(function(codeSnap){
         var id=resolveRestaurantId(codeSnap.val(),resolvedCode);
         if(id && startRestaurant(id)) return;
