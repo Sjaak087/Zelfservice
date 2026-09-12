@@ -202,7 +202,7 @@ function renderProducts(){
 }
 function updateCart(){const n=st.cart.reduce((s,x)=>s+x.q,0),t=st.cart.reduce((s,x)=>s+x.p*x.q,0);$('count').textContent=n;$('total').textContent=euro(t);$('cartBar').hidden=!n}
 function openCart(){const w=$('cartItems');w.innerHTML='';st.cart.forEach((x,i)=>{const r=document.createElement('div');r.className='cartrow';r.innerHTML='<div class="left"><strong>'+esc(x.n)+'</strong><span class="qtypill">'+x.q+' × '+euro(x.p)+'</span></div><button class="minus">−</button>';r.querySelector('button').onclick=()=>{x.q--;if(x.q<=0)st.cart.splice(i,1);openCart();updateCart()};w.appendChild(r)});$('cart').hidden=false}
-async function placeOrder(){if(!st.table||!st.cart.length)return;const total=st.cart.reduce((s,x)=>s+x.p*x.q,0);const order={tableId:st.table.id,tableNumber:st.table.number??null,items:st.cart.map(x=>({productId:x.id,name:x.n,price:x.p,quantity:x.q})),total,status:'nieuw',createdAt:firebase.database.ServerValue.TIMESTAMP};const path=st.ordersPath||('restaurant-selfserviceconfig-bestellingen/'+(st.key||'orders'));await firebase.database().ref(path).push(order);st.cart=[];updateCart();$('cart').hidden=true;$('doneText').textContent='Bestelling geplaatst voor '+tableLabel(st.table)+'.';show('doneStep')}
+async function placeOrder(){if(!st.table||!st.cart.length)return;const tableNum=Number(st.table.number??(String(st.table.id).match(/\d+/)?.[0])??0);const order={items:st.cart.map(x=>({productId:x.id,name:x.n,price:x.p,quantity:x.q})),status:'nieuw',tableNumber:tableNum,tijd:firebase.database.ServerValue.TIMESTAMP};const path=st.ordersPath||('restaurant-selfserviceconfig-bestellingen/'+(st.key||'orders'));await firebase.database().ref(path).push(order);st.cart=[];updateCart();$('cart').hidden=true;$('doneText').textContent='Bestelling geplaatst voor '+tableLabel(st.table)+'.';show('doneStep')}
 async function waitForFirebase(timeoutMs=8000){
   const started=Date.now();
   while(!(window.firebase && firebase.database)){
@@ -223,14 +223,14 @@ async function boot(){
     st.key=f.id;st.restaurant=f.data||{};$('restaurant').textContent=st.restaurant.naam||st.restaurant.name||st.restaurant.restaurantName||'Zelfservice';
 
     // Nieuwe expliciete database-tabs/roots.
-    const layoutRaw=await loadBranch('restaurant-selfserviceconfig-plattegrond',['restaurant-selfserviceconfig-plattegrond/'+(st.key||''),'restaurants/'+(st.key||'')+'/plattegrond']);
-    const productsRaw=await loadBranch('restaurant-selfserviceconfig-producten',['restaurant-selfserviceconfig-producten/'+(st.key||''),'restaurants/'+(st.key||'')+'/producten']);
+    const layoutRaw=await loadBranch('restaurant-selfserviceconfig-plattegrond',['restaurant-selfserviceconfig-plattegrond/'+(st.key||''),'restaurants/'+(st.key||'')+'/selfserviceconfig/plattegrond','restaurants/'+(st.key||'')+'/plattegrond']);
+    const productsRaw=await loadBranch('restaurant-selfserviceconfig-producten',['restaurant-selfserviceconfig-producten/'+(st.key||''),'restaurants/'+(st.key||'')+'/selfserviceconfig/producten','restaurants/'+(st.key||'')+'/producten']);
     st.layout=extractLayout(layoutRaw);st.products=extractProducts(productsRaw);
-    st.ordersPath=st.key?('restaurant-selfserviceconfig-bestellingen/'+st.key):'restaurant-selfserviceconfig-bestellingen';
+    st.ordersPath=st.key?('restaurants/'+st.key+'/selfserviceconfig/bestelde dingen/keuken'):'restaurant-selfserviceconfig-bestellingen';
     renderFloorplan();renderProducts();show('tablesStep');
 
-    const layoutRef=st.key?firebase.database().ref('restaurant-selfserviceconfig-plattegrond/'+st.key):firebase.database().ref('restaurant-selfserviceconfig-plattegrond');
-    const productRef=st.key?firebase.database().ref('restaurant-selfserviceconfig-producten/'+st.key):firebase.database().ref('restaurant-selfserviceconfig-producten');
+    const layoutRef=st.key?firebase.database().ref('restaurants/'+st.key+'/selfserviceconfig/plattegrond'):firebase.database().ref('restaurant-selfserviceconfig-plattegrond');
+    const productRef=st.key?firebase.database().ref('restaurants/'+st.key+'/selfserviceconfig/producten'):firebase.database().ref('restaurant-selfserviceconfig-producten');
     layoutRef.on('value',s=>{if(s.val()!=null){st.layout=extractLayout(s.val());renderFloorplan()}});
     productRef.on('value',s=>{if(s.val()!=null){st.products=extractProducts(s.val());renderProducts()}});
   }catch(e){console.error(e);status('Zelfservice kan niet starten','Firebase kon niet worden geladen of gelezen.',String(e?.stack||e))}
