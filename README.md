@@ -1,1 +1,9 @@
-Put these files in the root of the GitHub Pages repository. No js/ or css/ directories are required. Firebase data: restaurants/*/selfservicecode, restaurants/{id}/floorplan/tables, restaurants/{id}/products.
+# Zelfservice
+
+Gebruikt de Firebase-structuur met de tabs/roots:
+- `restaurant-selfserviceconfig`
+- `restaurant-selfserviceconfig-plattegrond`
+- `restaurant-selfserviceconfig-producten`
+- `restaurant-selfserviceconfig-bestellingen`
+
+De 5-cijferige `selfservicecode` wordt uit `restaurant-selfserviceconfig` gezocht. Daarna worden de plattegrond en producten uit de overeenkomstige tabs geladen.

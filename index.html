@@ -11,19 +11,108 @@ const $=id=>document.getElementById(id);
 const esc=v=>{const d=document.createElement('div');d.textContent=v??'';return d.innerHTML};
 const euro=v=>'€ '+(Number(v)||0).toFixed(2).replace('.',',');
 const entries=v=>Array.isArray(v)?v.map((x,i)=>({id:String(i),...(x&&typeof x==='object'?x:{value:x})})):v&&typeof v==='object'?Object.entries(v).map(([id,x])=>({id,...(x&&typeof x==='object'?x:{value:x})}))[];
-const st={id:null,code:null,restaurant:null,tables:{},products:{},table:null,cart:[]};
+const st={id:null,code:null,restaurant:null,floorplan:{},products:{},table:null,cart:[]};
 function code(){const u=new URL(location.href);for(const k of ['selfservicecode','selfServiceCode','code','joinCode','joincode']){const v=u.searchParams.get(k);if(/^\d{5}$/.test(v||''))return v}for(const s of [...u.pathname.split('/'),u.search,u.hash]){const m=String(s).match(/(?<!\d)(\d{5})(?!\d)/);if(m)return m[1]}return''}
 function show(x){for(const id of ['loading','tablesStep','menuStep','doneStep'])$(id).hidden=id!==x}
 function status(a,b,c=''){ $('statusTitle').textContent=a;$('statusText').textContent=b;$('debug').textContent=c;$('debug').hidden=!c }
-function tableLabel(t){const n=t.number??t.nummer??t.tableNumber??t.label??t.name??t.naam;return n!==undefined&&n!==null&&n!==''?(String(n).toLowerCase().startsWith('tafel')?String(n):'Tafel '+n):'Tafel'}
-function productLabel(p){return p.naam??p.name??p.title??p.label??'Product'}
-function price(p){return Number(p.prijs??p.price??p.amount??0)||0}
-async function findRestaurant(c){const snap=await firebase.database().ref('restaurants').once('value');const all=snap.val()||{};for(const [id,r] of Object.entries(all)){if(!r||typeof r!=='object')continue;const vals=[r.selfservicecode,r.selfServiceCode,r.selfserviceCode,r.selfServicecode,r.self_service_code];if(vals.some(v=>String(v??'').trim()===c||String(v??'').replace(/\D/g,'')===c))return{id,data:r}}return null}
-function renderTables(){const g=$('tables');g.innerHTML='';const a=entries(st.tables).filter(t=>t&&typeof t==='object'&&String(t.kind??t.type??'').toLowerCase()==='tafel').sort((a,b)=>(Number(a.number)||99999)-(Number(b.number)||99999));if(!a.length){g.innerHTML='<div class="empty">Geen tafels gevonden.<br><small>restaurants/'+esc(st.id)+'/floorplan/tables</small></div>';return}for(const t of a){const b=document.createElement('button');b.className='table';b.innerHTML='<strong>'+esc(tableLabel(t))+'</strong><span>'+esc(t.shape||'')+'</span>';b.onclick=()=>{st.table=t;$('chosen').textContent=tableLabel(t);renderProducts();show('menuStep')};g.appendChild(b)}}
-function renderProducts(){const w=$('products');w.innerHTML='';const a=entries(st.products).filter(p=>p&&typeof p==='object').filter(p=>p.actief!==false&&p.active!==false&&p.disabled!==true&&p.hidden!==true);if(!a.length){w.innerHTML='<div class="empty">Geen producten gevonden.<br><small>restaurants/'+esc(st.id)+'/products</small></div>';return}const gs={};for(const p of a){const c=p.categorie??p.category??p.group??'Menu';(gs[c]??=[]).push(p)}for(const [cat,items] of Object.entries(gs)){const h=document.createElement('h2');h.textContent=cat;w.appendChild(h);for(const p of items){const b=document.createElement('button');b.className='product';b.innerHTML='<span><strong>'+esc(productLabel(p))+'</strong></span><b>'+euro(price(p))+'</b>';b.onclick=()=>{const ex=st.cart.find(x=>x.id===p.id);if(ex)ex.q++;else st.cart.push({id:p.id,n:productLabel(p),p:price(p),q:1});updateCart()};w.appendChild(b)}}}
+function objectName(item){return item?.id??''}
+function tableLabel(t){
+  const raw=t.label??t.name??t.naam??t.number??t.nummer??t.tableNumber??t.id??'';
+  const s=String(raw);
+  if(/^tafel\b/i.test(s)) return s;
+  if(/^table\b/i.test(s)) return s;
+  if(t.number!==undefined&&t.number!==null&&t.number!=='') return 'Tafel '+t.number;
+  if(/^tafel\s*\d+/i.test(s)) return s;
+  if(/^table\s*\d+/i.test(s)) return s;
+  return s||'Tafel';
+}
+function isTable(t){
+  const k=String(t.kind??t.type??t.soort??'').toLowerCase();
+  const n=String(t.id??t.name??t.label??'').toLowerCase();
+  return k==='tafel'||k==='table'||/^tafel\\s*\\d+/i.test(n)||/^table\\s*\\d+/i.test(n);
+}
+function isBank(t){
+  const k=String(t.kind??t.type??t.soort??'').toLowerCase();
+  const n=String(t.id??t.name??t.label??'').toLowerCase();
+  return k==='bank'||k==='bench'||/^bank\\s*\\d+/i.test(n)||/^bench\\s*\\d+/i.test(n);
+}
+function productLabel(p){return p.naam??p.name??p.title??p.label??p.id??'Product'}
+function price(p){return Number(p.prijs??p.price??p.amount??p.cost??0)||0}
+async function findRestaurant(c){
+  const snap=await firebase.database().ref('restaurants').once('value');
+  const all=snap.val()||{};
+  for(const [id,r] of Object.entries(all)){
+    if(!r||typeof r!=='object')continue;
+    const vals=[r.selfservicecode,r.selfServiceCode,r.selfserviceCode,r.selfServicecode,r.self_service_code,r.selfservice?.code,r.selfService?.code];
+    if(vals.some(v=>String(v??'').trim()===c||String(v??'').replace(/\\D/g,'')===c)) return {id,data:r};
+  }
+  return null;
+}
+function renderFloorplan(){
+  const g=$('tables');
+  g.innerHTML='';
+  const all=entries(st.floorplan).filter(x=>x&&typeof x==='object');
+  const banks=all.filter(isBank);
+  const tables=all.filter(isTable).sort((a,b)=>{
+    const an=Number(a.number??String(a.id).match(/\\d+/)?.[0]);
+    const bn=Number(b.number??String(b.id).match(/\\d+/)?.[0]);
+    return (an||99999)-(bn||99999);
+  });
+  if(banks.length||tables.length){
+    const info=document.createElement('div');
+    info.className='empty';
+    info.style.marginBottom='14px';
+    info.innerHTML='Plattegrond geladen: <strong>'+tables.length+'</strong> tafels en <strong>'+banks.length+'</strong> banken';
+    g.appendChild(info);
+  }
+  if(!tables.length){
+    g.innerHTML += '<div class="empty">Geen tafels gevonden onder <small>restaurants/'+esc(st.id)+'/plattegrond</small>.</div>';
+    return;
+  }
+  for(const t of tables){
+    const b=document.createElement('button');
+    b.className='table';
+    b.innerHTML='<strong>'+esc(tableLabel(t))+'</strong><span>'+esc(t.shape??t.vorm??'')+'</span>';
+    b.onclick=()=>{st.table=t;$('chosen').textContent=tableLabel(t);renderProducts();show('menuStep')};
+    g.appendChild(b);
+  }
+}
+function renderProducts(){
+  const w=$('products');w.innerHTML='';
+  const a=entries(st.products).filter(p=>p&&typeof p==='object').filter(p=>p.actief!==false&&p.active!==false&&p.disabled!==true&&p.hidden!==true);
+  if(!a.length){w.innerHTML='<div class="empty">Geen producten gevonden.<br><small>restaurants/'+esc(st.id)+'/producten</small></div>';return}
+  const gs={};
+  for(const p of a){const c=p.categorie??p.category??p.group??'Menu';(gs[c]??=[]).push(p)}
+  for(const [cat,items] of Object.entries(gs)){
+    const h=document.createElement('h2');h.textContent=cat;w.appendChild(h);
+    for(const p of items){
+      const b=document.createElement('button');b.className='product';
+      b.innerHTML='<span><strong>'+esc(productLabel(p))+'</strong></span><b>'+euro(price(p))+'</b>';
+      b.onclick=()=>{const ex=st.cart.find(x=>x.id===p.id);if(ex)ex.q++;else st.cart.push({id:p.id,n:productLabel(p),p:price(p),q:1});updateCart()};
+      w.appendChild(b)
+    }
+  }
+}
 function updateCart(){const n=st.cart.reduce((s,x)=>s+x.q,0),t=st.cart.reduce((s,x)=>s+x.p*x.q,0);$('count').textContent=n;$('total').textContent=euro(t);$('cartBar').hidden=!n}
 function openCart(){const w=$('cartItems');w.innerHTML='';st.cart.forEach((x,i)=>{const r=document.createElement('div');r.className='cartrow';r.innerHTML='<span>'+x.q+'× '+esc(x.n)+'</span><button>−</button>';r.querySelector('button').onclick=()=>{x.q--;if(x.q<=0)st.cart.splice(i,1);openCart();updateCart()};w.appendChild(r)});$('cart').hidden=false}
 async function placeOrder(){if(!st.table||!st.cart.length)return;const total=st.cart.reduce((s,x)=>s+x.p*x.q,0);const order={tableId:st.table.id,tableNumber:st.table.number??null,items:st.cart.map(x=>({productId:x.id,name:x.n,price:x.p,quantity:x.q})),total,status:'nieuw',createdAt:firebase.database.ServerValue.TIMESTAMP};await firebase.database().ref('restaurants/'+st.id+'/bestellingen').push(order);st.cart=[];updateCart();$('cart').hidden=true;$('doneText').textContent='Bestelling geplaatst voor '+tableLabel(st.table)+'.';show('doneStep')}
-async function boot(){try{firebase.initializeApp(firebaseConfig);st.code=code();if(!st.code){status('Geen selfservicecode','Open de QR-link van het restaurant.','Geen 5-cijferige code gevonden in de URL.');return}$('statusText').textContent='Restaurant zoeken met code '+st.code+'…';const f=await findRestaurant(st.code);if(!f){status('Restaurant niet gevonden','Geen restaurant gevonden met code '+st.code,'Controleer restaurants/*/selfservicecode.');return}st.id=f.id;st.restaurant=f.data;$('restaurant').textContent=st.restaurant.naam||st.restaurant.name||'Zelfservice';const base=firebase.database().ref('restaurants/'+st.id);const [ts,ps]=await Promise.all([base.child('floorplan/tables').once('value'),base.child('products').once('value')]);st.tables=ts.val()||{};st.products=ps.val()||{};renderTables();renderProducts();show('tablesStep');base.child('floorplan/tables').on('value',s=>{st.tables=s.val()||{};renderTables()});base.child('products').on('value',s=>{st.products=s.val()||{};renderProducts()})}catch(e){console.error(e);status('Zelfservice kan niet starten','Firebase kon niet worden geladen of gelezen.',String(e?.stack||e))}}
+async function boot(){try{firebase.initializeApp(firebaseConfig);st.code=code();if(!st.code){status('Geen selfservicecode','Open de QR-link van het restaurant.','Geen 5-cijferige code gevonden in de URL.');return}$('statusText').textContent='Restaurant zoeken met code '+st.code+'…';const f=await findRestaurant(st.code);if(!f){status('Restaurant niet gevonden','Geen restaurant gevonden met code '+st.code,'Controleer restaurants/*/selfservicecode.');return}st.id=f.id;st.restaurant=f.data;$('restaurant').textContent=st.restaurant.naam||st.restaurant.name||'Zelfservice';const base=firebase.database().ref('restaurants/'+st.id);
+// Nieuwe database-indeling: plattegrond/* en producten/*
+const [fs,ps]=await Promise.all([
+  base.child('plattegrond').once('value'),
+  base.child('producten').once('value')
+]);
+// Fallback voor oude database-indeling
+st.floorplan=fs.val()||{};
+st.products=ps.val()||{};
+if(!Object.keys(st.floorplan).length){const old=await base.child('floorplan/tables').once('value');st.floorplan=old.val()||{}}
+if(!Object.keys(st.products).length){const oldp=await base.child('products').once('value');st.products=oldp.val()||{}}
+renderFloorplan();renderProducts();show('tablesStep');
+base.child('plattegrond').on('value',s=>{st.floorplan=s.val()||{};renderFloorplan()});
+base.child('producten').on('value',s=>{st.products=s.val()||{};renderProducts()});
+// Oude paden blijven als fallback/listener
+base.child('floorplan/tables').on('value',s=>{if(!Object.keys(st.floorplan).length){st.floorplan=s.val()||{};renderFloorplan()}});
+base.child('products').on('value',s=>{if(!Object.keys(st.products).length){st.products=s.val()||{};renderProducts()}})
+}catch(e){console.error(e);status('Zelfservice kan niet starten','Firebase kon niet worden geladen of gelezen.',String(e?.stack||e))}}
 document.addEventListener('DOMContentLoaded',()=>{ $('tablesNav').onclick=()=>show('tablesStep');$('menuNav').onclick=()=>{if(st.table)show('menuStep')};$('cartOpen').onclick=openCart;$('cartClose').onclick=()=>$('cart').hidden=true;$('place').onclick=()=>placeOrder().catch(e=>alert('Bestelling mislukt: '+e.message));$('new').onclick=()=>show('tablesStep');boot()});
 </script></body></html>
