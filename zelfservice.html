@@ -187,7 +187,7 @@ function renderFloorplan(){
   const g=$('tables'); g.innerHTML='';
   const all=entries(st.layout).filter(x=>x&&typeof x==='object');
   const banks=all.filter(isBank), tables=all.filter(isTable).sort((a,b)=>{
-    const an=Number(a.number??String(a.id).match(/\d+/)?.[0]||99999), bn=Number(b.number??String(b.id).match(/\d+/)?.[0]||99999); return an-bn;
+    const an=Number(a.number??(String(a.id).match(/\d+/)?.[0])??99999), bn=Number(b.number??(String(b.id).match(/\d+/)?.[0])??99999); return an-bn;
   });
   const head=document.createElement('div');head.className='empty';head.style.marginBottom='14px';head.innerHTML=`Plattegrond geladen: <strong>${tables.length}</strong> tafels en <strong>${banks.length}</strong> banken`;g.appendChild(head);
   if(!tables.length){g.innerHTML+='<div class="empty">Geen tafels gevonden in restaurant-selfserviceconfig-plattegrond.</div>';return}
