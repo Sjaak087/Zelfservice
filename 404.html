@@ -1,1 +1,248 @@
-<!doctype html><html><body><script>location.replace((location.pathname.split('/').filter(Boolean).length?'/'+location.pathname.split('/').filter(Boolean)[0]+'/':'/')+(location.pathname.match(/(?:^|\/)(\d{5})(?:\/)?$/)?'?selfservicecode='+RegExp.$1:''));</script></body></html>
+<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zelfservice</title><style>
+:root{
+  --bg:#0b0b0e;
+  --surface:#17171b;
+  --surface-2:#202027;
+  --text:#f7f1e8;
+  --muted:#b9b0a6;
+  --line:#34313a;
+  --accent:#6f2a72;
+  --accent-2:#c68a3a;
+  --shadow:0 12px 40px rgba(42,34,23,.08);
+  --radius:22px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(circle at 10% 0%,#26212f 0,#121218 38%,#07070a 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+button{font:inherit}
+.wrap{width:min(1120px,100%);margin:0 auto;min-height:100vh;background:rgba(20,19,24,.78);backdrop-filter:blur(14px);box-shadow:0 0 0 1px rgba(255,255,255,.05),0 25px 80px rgba(0,0,0,.35)}
+header{position:sticky;top:0;z-index:20;padding:18px 22px 16px;border-bottom:1px solid rgba(232,225,215,.9);background:rgba(18,18,23,.92);backdrop-filter:blur(18px)}
+.headrow{display:flex;align-items:center;justify-content:space-between;gap:16px;max-width:1040px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#24231f,#11110f);color:#fff;font-weight:800;box-shadow:0 8px 18px rgba(17,17,15,.18)}
+.restaurant{font-weight:800;font-size:20px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.subtle{font-size:12px;color:var(--muted);margin-top:3px}
+nav{display:flex;align-items:center;gap:7px;background:var(--surface-2);border:1px solid var(--line);padding:5px;border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+nav button{border:0;background:transparent;color:var(--muted);padding:9px 12px;border-radius:10px;cursor:pointer;font-weight:700}
+nav button:hover{color:var(--text)}
+main{padding:30px 22px 130px;max-width:1040px;margin:0 auto}
+.center{padding:90px 20px;text-align:center}
+.loadingmark{width:54px;height:54px;border:4px solid #e9e3d8;border-top-color:#20201c;border-radius:50%;animation:spin .9s linear infinite;margin:0 auto 22px}
+@keyframes spin{to{transform:rotate(360deg)}}
+h1{font-size:clamp(30px,4vw,44px);letter-spacing:-.03em;margin:0 0 8px;line-height:1.05}
+h2{font-size:21px;letter-spacing:-.02em;margin:28px 0 12px}
+p{color:var(--muted);margin:0 0 24px;line-height:1.55}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;padding:7px 10px;border-radius:999px;background:#2a2230;border:1px solid #47334f;font-size:12px;font-weight:800;color:#cbb8d0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+.hero{padding:32px;border-radius:28px;background:linear-gradient(135deg,#1a1820 0,#221d28 100%);border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:22px}
+.hero p{max-width:650px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px}
+button.table{position:relative;background:linear-gradient(180deg,#1d1b22,#151419);border:1px solid var(--line);border-radius:20px;padding:22px 20px;cursor:pointer;text-align:left;min-height:128px;box-shadow:0 8px 24px rgba(42,34,23,.05);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+button.table:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(42,34,23,.10);border-color:#d9cfbf}
+button.table::after{content:'Kies deze tafel  →';position:absolute;left:20px;bottom:17px;font-size:12px;font-weight:700;color:#9c9489}
+.table strong{display:block;font-size:22px;line-height:1.1;margin-bottom:7px}
+.table span{display:block;color:var(--muted);font-size:13px;text-transform:capitalize}
+.tabletag{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border-radius:999px;background:#2b2630;border:1px solid #443a49;color:#c7bac7;font-size:11px;font-weight:800;margin-bottom:14px}
+.empty{padding:24px;text-align:center;border:1px dashed #d7cec0;border-radius:18px;color:#72695e;background:#fcfaf7}
+.product-section{margin-top:24px}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.product-card{display:flex;flex-direction:column;gap:14px;padding:18px;border:1px solid var(--line);border-radius:20px;background:#19171d;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .16s ease,box-shadow .16s ease}
+.product-card:hover{transform:translateY(-2px);box-shadow:0 14px 28px rgba(42,34,23,.09)}
+.product-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.product-name{font-size:16px;font-weight:800;line-height:1.25}
+.product-price{font-size:15px;font-weight:800;white-space:nowrap}
+.product-desc{font-size:13px;color:var(--muted);line-height:1.5;min-height:38px}
+.addbtn{width:100%;border:0;background:var(--accent);color:#fff;padding:12px 14px;border-radius:13px;cursor:pointer;font-weight:800;transition:transform .15s ease,opacity .15s ease}
+.addbtn:hover{opacity:.92;transform:translateY(-1px)}
+.stepbar{display:flex;align-items:center;gap:8px;margin:0 0 22px;flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:8px;padding:8px 11px;border:1px solid var(--line);background:#fff;border-radius:999px;font-size:12px;font-weight:800;color:#8c8478}
+.step.active{background:#6f2a72;color:#fff;border-color:#6f2a72}.dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.5}
+.bar{position:fixed;z-index:30;left:50%;transform:translateX(-50%);bottom:18px;width:min(1040px,calc(100% - 24px));background:rgba(24,24,21,.96);color:#fff;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:14px;box-shadow:0 18px 50px rgba(0,0,0,.24);backdrop-filter:blur(16px)}
+.cartinfo{display:flex;flex-direction:column;gap:2px}.cartinfo strong{font-size:14px}.cartinfo span{font-size:12px;color:#c9c7c1}
+.btn{background:#fff;color:#201722;border:0;border-radius:12px;padding:11px 15px;cursor:pointer;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.14)}
+.btn:hover{transform:translateY(-1px)}.secondary{background:#2a2730;color:#f7f1e8;box-shadow:none}
+.modal{position:fixed;z-index:50;inset:0;background:rgba(0,0,0,.68);display:flex;align-items:flex-end;justify-content:center;padding:0 12px}
+.panel{width:min(700px,100%);background:#fff;border-radius:26px 26px 0 0;padding:24px;max-height:82vh;overflow:auto;box-shadow:0 -20px 60px rgba(0,0,0,.2)}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}.panel h2{margin:0;font-size:25px}.closex{border:1px solid var(--line);background:#242128;width:38px;height:38px;border-radius:50%;cursor:pointer}
+.cartrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.cartrow .left{display:flex;flex-direction:column;gap:4px}.qtypill{font-size:11px;font-weight:800;color:#7f776c}.minus{border:1px solid var(--line);background:#fff;width:34px;height:34px;border-radius:10px;cursor:pointer}
+.debug{white-space:pre-wrap;text-align:left;max-width:800px;margin:20px auto;padding:15px;background:#111;color:#f3f1ec;border-radius:14px;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto}
+.success{display:inline-flex;align-items:center;justify-content:center;width:76px;height:76px;border-radius:50%;background:#2c2130;color:#f7f1e8;font-size:32px;margin-bottom:18px}
+@media (max-width:760px){header{padding:14px 14px 12px}.headrow{align-items:flex-start;flex-direction:column}.wrap{box-shadow:none}.hero{padding:24px;border-radius:22px}main{padding:22px 14px 130px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.product-grid{grid-template-columns:1fr}.bar{bottom:10px;width:calc(100% - 16px)}nav{width:100%}nav button{flex:1}}
+@media (max-width:420px){.grid{grid-template-columns:1fr}.table{min-height:118px!important}}
+[hidden]{display:none!important}
+</style><script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script></head><body><div class="wrap"><header><div class="headrow"><div class="brand"><div class="logo">Z</div><div><div class="restaurant" id="restaurant">Zelfservice</div><div class="subtle">Bestellen aan tafel</div></div></div><nav><button id="tablesNav">1 · Tafel</button><button id="menuNav">2 · Menu</button></nav></div></header><main>
+<section id="loading"><div class="center"><div class="loadingmark"></div><div class="eyebrow">Zelfservice</div><h1 id="statusTitle">Even laden…</h1><p id="statusText">Verbinden met het restaurant…</p><pre class="debug" id="debug" hidden></pre></div></section>
+<section id="tablesStep" hidden><div class="stepbar"><span class="step active"><span class="dot"></span>Tafel kiezen</span><span class="step"><span class="dot"></span>Bestellen</span></div><div class="hero"><div class="eyebrow">Welkom</div><h1>Waar zit je?</h1><p>Kies je tafel om het menu te openen.</p></div><div class="grid" id="tables"></div></section>
+<section id="menuStep" hidden><div class="stepbar"><button class="step active" id="backToTables" type="button"><span class="dot"></span>Tafel kiezen</button><span class="step active"><span class="dot"></span>Bestellen</span></div><div class="hero"><div class="eyebrow">Jouw tafel</div><h1>Menu</h1><p>Je bestelt voor <strong id="chosen">geen tafel</strong>. Tik op een gerecht om het toe te voegen.</p></div><div id="products" class="product-section"></div></section>
+<section id="doneStep" hidden><div class="center"><div class="success">✓</div><h1>Bestelling geplaatst</h1><p id="doneText"></p><button class="btn" id="new">Nieuwe bestelling</button></div></section>
+</main></div><div class="bar" id="cartBar" hidden><div class="cartinfo"><strong><b id="count">0</b> items in je bestelling</strong><span>Subtotaal <b id="total">€ 0,00</b></span></div><button class="btn" id="cartOpen">Bekijk bestelling</button></div><div class="modal" id="cart" hidden><div class="panel"><div class="panel-head"><h2>Je bestelling</h2><button class="closex" id="cartClose" aria-label="Sluiten">×</button></div><div id="cartItems"></div><div style="display:flex;gap:10px;margin-top:18px"><button class="btn" id="place">Bestelling plaatsen</button></div></div></div><script>
+const firebaseConfig={apiKey:"AIzaSyBVwx6eUdSkebGIK2J_NDwOD3rxTcIg1v4",authDomain:"restaurant-het-goedkoop.firebaseapp.com",databaseURL:"https://restaurant-het-goedkoop-default-rtdb.europe-west1.firebasedatabase.app",projectId:"restaurant-het-goedkoop",storageBucket:"restaurant-het-goedkoop.firebasestorage.app",messagingSenderId:"262921210117",appId:"1:262921210117:web:4158692d91fd580cda4f6c"};
+const $=id=>document.getElementById(id);
+const esc=v=>{const d=document.createElement('div');d.textContent=v??'';return d.innerHTML};
+const euro=v=>'€ '+(Number(v)||0).toFixed(2).replace('.',',');
+const entries=v=>Array.isArray(v)?v.map((x,i)=>({id:String(i),...(x&&typeof x==='object'?x:{value:x})})):v&&typeof v==='object'?Object.entries(v).map(([id,x])=>({id,...(x&&typeof x==='object'?x:{value:x})})):[];
+const st={key:null,code:null,restaurant:null,layout:{},products:{},table:null,cart:[],ordersPath:null};
+
+function getCode(){
+  const u=new URL(location.href);
+  for(const k of ['selfservicecode','selfServiceCode','selfserviceCode','code','joinCode','joincode']){
+    const v=u.searchParams.get(k); if(/^\d{5}$/.test(v||'')) return v;
+  }
+  for(const s of [u.pathname,u.hash]){const m=String(s).match(/(?<!\d)(\d{5})(?!\d)/);if(m)return m[1]}
+  return '';
+}
+function show(x){for(const id of ['loading','tablesStep','menuStep','doneStep'])$(id).hidden=id!==x}
+function status(a,b,c=''){ $('statusTitle').textContent=a;$('statusText').textContent=b;$('debug').textContent=c;$('debug').hidden=!c }
+
+function tableLabel(t){
+  const raw=t.label??t.name??t.naam??t.number??t.nummer??t.tableNumber??t.id??'';
+  const s=String(raw);
+  if(/^tafel\b/i.test(s)||/^table\b/i.test(s))return s;
+  if(t.number!==undefined&&t.number!==null&&t.number!=='')return 'Tafel '+t.number;
+  if(/^\d+$/.test(s))return 'Tafel '+s;
+  return s||'Tafel';
+}
+function isTable(t){
+  const k=String(t.kind??t.type??t.soort??'').toLowerCase(), n=String(t.id??t.name??t.label??t.naam??'').toLowerCase();
+  return k==='tafel'||k==='table'||/^tafel\s*\d+/i.test(n)||/^table\s*\d+/i.test(n)||t.number!==undefined;
+}
+function isBank(t){
+  const k=String(t.kind??t.type??t.soort??'').toLowerCase(), n=String(t.id??t.name??t.label??t.naam??'').toLowerCase();
+  return k==='bank'||k==='bench'||/^bank\s*\d+/i.test(n)||/^bench\s*\d+/i.test(n);
+}
+function productLabel(p){return p.naam??p.name??p.title??p.label??p.productName??p.id??'Product'}
+function price(p){return Number(p.prijs??p.price??p.amount??p.cost??0)||0}
+
+function looksLikeRestaurantObject(o, code){
+  if(!o||typeof o!=='object')return false;
+  const vals=[o.selfservicecode,o.selfServiceCode,o.selfserviceCode,o.selfServicecode,o.code,o.joinCode,o.joincode,o.selfservice?.code,o.selfService?.code];
+  return vals.some(v=>String(v??'').replace(/\D/g,'')===code);
+}
+function looksLikeTableMap(o){
+  if(!o||typeof o!=='object')return false;
+  const a=entries(o); return a.some(x=>x&&typeof x==='object'&&(isTable(x)||isBank(x)));
+}
+function pickRestaurantConfig(root, code){
+  if(looksLikeRestaurantObject(root,code)) return {key:null,data:root};
+  for(const [key,val] of Object.entries(root||{})){
+    if(looksLikeRestaurantObject(val,code)) return {key,data:val};
+  }
+  return null;
+}
+async function readAny(path){
+  try{return (await firebase.database().ref(path).once('value')).val()}catch(e){return null}
+}
+async function findRestaurant(code){
+  // Nieuwe structuur: restaurant-selfserviceconfig
+  const cfg=await readAny('restaurant-selfserviceconfig');
+  const hit=pickRestaurantConfig(cfg,code);
+  if(hit) return {id:hit.key||hit.data.id||hit.data.restaurantId||hit.data.restaurantID||null,data:hit.data,source:'restaurant-selfserviceconfig'};
+  // Ook ondersteunen wanneer restaurant-selfserviceconfig per code als key gebruikt wordt.
+  if(cfg&&typeof cfg==='object'&&cfg[code]) return {id:cfg[code].restaurantId||cfg[code].id||code,data:cfg[code],source:'restaurant-selfserviceconfig'};
+  // Oude structuur fallback
+  const old=await readAny('restaurants');
+  const oldHit=pickRestaurantConfig(old,code);
+  if(oldHit) return {id:oldHit.key||oldHit.data.id||oldHit.data.restaurantId||null,data:oldHit.data,source:'restaurants'};
+  return null;
+}
+function candidateKey(st){
+  return [st.key,st.restaurant?.id,st.restaurant?.restaurantId,st.restaurant?.restaurantID,st.restaurant?.slug,st.restaurant?.naam,st.restaurant?.name].filter(v=>v!==null&&v!==undefined).map(String);
+}
+function findNestedForKeys(root, keys){
+  if(!root||typeof root!=='object')return null;
+  const lower=new Set(keys.map(x=>String(x).toLowerCase()));
+  for(const [k,v] of Object.entries(root)) if(lower.has(String(k).toLowerCase())) return v;
+  // Search one additional object level for a matching restaurant key/id.
+  for(const [k,v] of Object.entries(root)){
+    if(v&&typeof v==='object'){
+      for(const key of keys) if(String(v.restaurantId??v.restaurantID??v.id??'').toLowerCase()===String(key).toLowerCase()) return v;
+    }
+  }
+  return null;
+}
+async function loadBranch(baseName, fallbackNames=[]){
+  const names=[baseName,...fallbackNames];
+  for(const name of names){
+    const root=await readAny(name); if(root==null)continue;
+    const nested=findNestedForKeys(root,candidateKey(st));
+    if(nested!=null)return nested;
+    // If this branch itself is already the restaurant payload, use it.
+    if(looksLikeTableMap(root) || entries(root).some(x=>x&&typeof x==='object'&&(x.price!==undefined||x.prijs!==undefined||x.name!==undefined||x.naam!==undefined))) return root;
+  }
+  return {};
+}
+function extractLayout(root){
+  if(!root||typeof root!=='object')return {};
+  // Common shapes: branch/{restaurant}/plattegrond or direct tables/banks.
+  for(const k of ['plattegrond','floorplan','tables','tafels']) if(root[k]&&typeof root[k]==='object') return root[k];
+  if(root.tables&&typeof root.tables==='object')return root.tables;
+  return root;
+}
+function extractProducts(root){
+  if(!root||typeof root!=='object')return {};
+  for(const k of ['producten','products','menu','items']) if(root[k]&&typeof root[k]==='object')return root[k];
+  return root;
+}
+function renderFloorplan(){
+  const g=$('tables'); g.innerHTML='';
+  const all=entries(st.layout).filter(x=>x&&typeof x==='object');
+  const banks=all.filter(isBank), tables=all.filter(isTable).sort((a,b)=>{
+    const an=Number(a.number??String(a.id).match(/\d+/)?.[0]||99999), bn=Number(b.number??String(b.id).match(/\d+/)?.[0]||99999); return an-bn;
+  });
+  const head=document.createElement('div');head.className='empty';head.style.marginBottom='14px';head.innerHTML=`Plattegrond geladen: <strong>${tables.length}</strong> tafels en <strong>${banks.length}</strong> banken`;g.appendChild(head);
+  if(!tables.length){g.innerHTML+='<div class="empty">Geen tafels gevonden in restaurant-selfserviceconfig-plattegrond.</div>';return}
+  for(const t of tables){const b=document.createElement('button');b.className='table';b.innerHTML='<strong>'+esc(tableLabel(t))+'</strong><span>'+esc(t.shape??t.vorm??'')+'</span>';b.onclick=()=>{st.table=t;$('chosen').textContent=tableLabel(t);renderProducts();show('menuStep')};g.appendChild(b)}
+}
+function renderProducts(){
+  const w=$('products');w.innerHTML='';
+  const a=entries(st.products).filter(p=>p&&typeof p==='object').filter(p=>p.actief!==false&&p.active!==false&&p.disabled!==true&&p.hidden!==true);
+  if(!a.length){w.innerHTML='<div class="empty">Geen producten gevonden in restaurant-selfserviceconfig-producten.</div>';return}
+  const gs={};for(const p of a){const c=p.categorie??p.category??p.group??'Menu';(gs[c]??=[]).push(p)}
+  for(const [cat,items] of Object.entries(gs)){const h=document.createElement('h2');h.textContent=cat;w.appendChild(h);for(const p of items){const b=document.createElement('button');b.className='product';b.innerHTML='<span><strong>'+esc(productLabel(p))+'</strong></span><b>'+euro(price(p))+'</b>';b.onclick=()=>{const ex=st.cart.find(x=>x.id===p.id);if(ex)ex.q++;else st.cart.push({id:p.id,n:productLabel(p),p:price(p),q:1});updateCart()};w.appendChild(b)}}
+}
+function updateCart(){const n=st.cart.reduce((s,x)=>s+x.q,0),t=st.cart.reduce((s,x)=>s+x.p*x.q,0);$('count').textContent=n;$('total').textContent=euro(t);$('cartBar').hidden=!n}
+function openCart(){const w=$('cartItems');w.innerHTML='';st.cart.forEach((x,i)=>{const r=document.createElement('div');r.className='cartrow';r.innerHTML='<div class="left"><strong>'+esc(x.n)+'</strong><span class="qtypill">'+x.q+' × '+euro(x.p)+'</span></div><button class="minus">−</button>';r.querySelector('button').onclick=()=>{x.q--;if(x.q<=0)st.cart.splice(i,1);openCart();updateCart()};w.appendChild(r)});$('cart').hidden=false}
+async function placeOrder(){if(!st.table||!st.cart.length)return;const total=st.cart.reduce((s,x)=>s+x.p*x.q,0);const order={tableId:st.table.id,tableNumber:st.table.number??null,items:st.cart.map(x=>({productId:x.id,name:x.n,price:x.p,quantity:x.q})),total,status:'nieuw',createdAt:firebase.database.ServerValue.TIMESTAMP};const path=st.ordersPath||('restaurant-selfserviceconfig-bestellingen/'+(st.key||'orders'));await firebase.database().ref(path).push(order);st.cart=[];updateCart();$('cart').hidden=true;$('doneText').textContent='Bestelling geplaatst voor '+tableLabel(st.table)+'.';show('doneStep')}
+async function waitForFirebase(timeoutMs=8000){
+  const started=Date.now();
+  while(!(window.firebase && firebase.database)){
+    if(Date.now()-started>timeoutMs) throw new Error('Firebase SDK kon niet worden geladen. Controleer of GitHub Pages internettoegang heeft.');
+    await new Promise(r=>setTimeout(r,100));
+  }
+}
+
+async function boot(){
+  try{
+    await waitForFirebase();
+    firebase.initializeApp(firebaseConfig);
+    st.code=getCode();
+    if(!st.code){status('QR-code ontbreekt','Open deze pagina via de QR-code van het restaurant.','Geen 5-cijferige selfservicecode gevonden in de URL.');return}
+    $('statusText').textContent='Restaurant zoeken met code '+st.code+'…';
+    const f=await findRestaurant(st.code);
+    if(!f){status('Restaurant niet gevonden','Geen configuratie gevonden met code '+st.code,'Gezocht in restaurant-selfserviceconfig en als fallback restaurants.');return}
+    st.key=f.id;st.restaurant=f.data||{};$('restaurant').textContent=st.restaurant.naam||st.restaurant.name||st.restaurant.restaurantName||'Zelfservice';
+
+    // Nieuwe expliciete database-tabs/roots.
+    const layoutRaw=await loadBranch('restaurant-selfserviceconfig-plattegrond',['restaurant-selfserviceconfig-plattegrond/'+(st.key||''),'restaurants/'+(st.key||'')+'/plattegrond']);
+    const productsRaw=await loadBranch('restaurant-selfserviceconfig-producten',['restaurant-selfserviceconfig-producten/'+(st.key||''),'restaurants/'+(st.key||'')+'/producten']);
+    st.layout=extractLayout(layoutRaw);st.products=extractProducts(productsRaw);
+    st.ordersPath=st.key?('restaurant-selfserviceconfig-bestellingen/'+st.key):'restaurant-selfserviceconfig-bestellingen';
+    renderFloorplan();renderProducts();show('tablesStep');
+
+    const layoutRef=st.key?firebase.database().ref('restaurant-selfserviceconfig-plattegrond/'+st.key):firebase.database().ref('restaurant-selfserviceconfig-plattegrond');
+    const productRef=st.key?firebase.database().ref('restaurant-selfserviceconfig-producten/'+st.key):firebase.database().ref('restaurant-selfserviceconfig-producten');
+    layoutRef.on('value',s=>{if(s.val()!=null){st.layout=extractLayout(s.val());renderFloorplan()}});
+    productRef.on('value',s=>{if(s.val()!=null){st.products=extractProducts(s.val());renderProducts()}});
+  }catch(e){console.error(e);status('Zelfservice kan niet starten','Firebase kon niet worden geladen of gelezen.',String(e?.stack||e))}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  $('tablesNav').onclick=()=>{if(st.table||!$('tablesStep').hidden)show('tablesStep')};
+  $('menuNav').onclick=()=>{if(st.table)show('menuStep')};
+  $('backToTables').onclick=()=>show('tablesStep');
+  $('cartOpen').onclick=openCart;$('cartClose').onclick=()=>$('cart').hidden=true;
+  $('place').onclick=()=>placeOrder().catch(e=>{console.error(e);alert('Bestelling mislukt: '+e.message)});
+  $('new').onclick=()=>show('tablesStep');
+  const watchdog=setTimeout(()=>{if(!$('loading').hidden){status('Verbinden duurt te lang','De gegevens van het restaurant konden niet binnen 8 seconden worden opgehaald.','Controleer de QR-code en Firebase Rules. Open browserconsole voor meer details.')}},8000);
+  boot().finally(()=>clearTimeout(watchdog));
+});
+</script></body></html>

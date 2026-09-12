@@ -1,9 +1,9 @@
-# Zelfservice
+# Restaurant zelfservice
 
-Gebruikt de Firebase-structuur met de tabs/roots:
+GitHub Pages zelfservice. Gebruik de QR-link met de 5-cijferige `selfservicecode`.
+
+Firebase roots:
 - `restaurant-selfserviceconfig`
 - `restaurant-selfserviceconfig-plattegrond`
 - `restaurant-selfserviceconfig-producten`
 - `restaurant-selfserviceconfig-bestellingen`
-
-De 5-cijferige `selfservicecode` wordt uit `restaurant-selfserviceconfig` gezocht. Daarna worden de plattegrond en producten uit de overeenkomstige tabs geladen.
