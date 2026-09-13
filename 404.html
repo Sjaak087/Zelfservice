@@ -91,6 +91,8 @@ button.tableplaque:active{transform:translateY(0)}
 
 .menu-list{margin-top:4px}
 .product-row{padding:16px 0;border-bottom:1px solid var(--line)}
+.product-row.out{opacity:.45}
+.product-row.out .addbtn,.product-row.out .stepper{display:none}
 .product-row:last-child{border-bottom:0}
 .product-top{display:flex;align-items:flex-end;gap:8px}
 .product-name{font-family:var(--serif);font-size:17.5px;color:var(--text);white-space:nowrap}
@@ -241,15 +243,18 @@ const firebaseConfig={apiKey:"AIzaSyBVwx6eUdSkebGIK2J_NDwOD3rxTcIg1v4",authDomai
 const $=id=>document.getElementById(id);
 const esc=v=>{const d=document.createElement('div');d.textContent=v??'';return d.innerHTML};
 const euro=v=>'€ '+(Number(v)||0).toFixed(2).replace('.',',');
-const entries=v=>Array.isArray(v)?v.map((x,i)=>({id:String(i),...(x&&typeof x==='object'?x:{value:x})})):v&&typeof v==='object'?Object.entries(v).map(([id,x])=>({id,...(x&&typeof x==='object'?x:{value:x})})):[];
-const st={key:null,code:null,restaurant:null,layout:{},products:{},table:null,cart:[],ordersPath:null};
+const st={key:null,restaurant:null,layout:{},products:{},stock:{},table:null,cart:[]};
 
+function getRestaurantId(){
+  const u=new URL(location.href);
+  return u.searchParams.get('id')||'';
+}
+// Oude 5-cijferige code, alleen nog gebruikt als er ooit geen id in de link zit.
 function getCode(){
   const u=new URL(location.href);
   for(const k of ['selfservicecode','selfServiceCode','selfserviceCode','code','joinCode','joincode']){
     const v=u.searchParams.get(k); if(/^\d{5}$/.test(v||'')) return v;
   }
-  for(const s of [u.pathname,u.hash]){const m=String(s).match(/(?<!\d)(\d{5})(?!\d)/);if(m)return m[1]}
   return '';
 }
 function show(x){for(const id of ['loading','tablesStep','menuStep','doneStep'])$(id).hidden=id!==x;
@@ -257,139 +262,96 @@ function show(x){for(const id of ['loading','tablesStep','menuStep','doneStep'])
 }
 function status(a,b,c=''){ $('statusTitle').textContent=a;$('statusText').textContent=b;$('debug').textContent=c;$('debug').hidden=!c }
 
-function tableLabel(t){
-  const raw=t.label??t.name??t.naam??t.number??t.nummer??t.tableNumber??t.id??'';
-  const s=String(raw);
-  if(/^tafel\b/i.test(s)||/^table\b/i.test(s))return s;
-  if(/^bank\b/i.test(s)||/^bench\b/i.test(s))return s;
-  if(t.number!==undefined&&t.number!==null&&t.number!=='')return 'Tafel '+t.number;
-  if(/^\d+$/.test(s))return 'Tafel '+s;
-  return s||'Tafel';
-}
-function isTable(t){
-  const k=String(t.kind??t.type??t.soort??'').toLowerCase(), n=String(t.id??t.name??t.label??t.naam??'').toLowerCase();
-  return k==='tafel'||k==='table'||/^tafel\s*\d+/i.test(n)||/^table\s*\d+/i.test(n)||t.number!==undefined;
-}
-function isBank(t){
-  const k=String(t.kind??t.type??t.soort??'').toLowerCase(), n=String(t.id??t.name??t.label??t.naam??'').toLowerCase();
-  return k==='bank'||k==='bench'||/^bank\s*\d+/i.test(n)||/^bench\s*\d+/i.test(n);
-}
-function productLabel(p){return p.naam??p.name??p.title??p.label??p.productName??p.id??'Product'}
-function price(p){return Number(p.prijs??p.price??p.amount??p.cost??0)||0}
-// Bepaalt of een gerecht naar de keuken of de bar moet. Kijkt eerst naar een expliciet
-// veld op het product (verschillende mogelijke veldnamen), en valt anders terug op de categorie.
-function productDestination(p){
-  const explicit=p.bestemming??p.afdeling??p.destination??p.station??p.printer??p.locatie??p.department??'';
-  const s=String(explicit).toLowerCase();
-  if(/\bbar\b|drank|drink/.test(s))return 'bar';
-  if(/keuken|kitchen|eten|food/.test(s))return 'keuken';
-  const cat=String(p.categorie??p.category??p.group??'').toLowerCase();
-  if(/drank|dranken|drink|bar/.test(cat))return 'bar';
-  return 'keuken';
-}
-
-function looksLikeRestaurantObject(o, code){
-  if(!o||typeof o!=='object')return false;
-  const vals=[o.selfservicecode,o.selfServiceCode,o.selfserviceCode,o.selfServicecode,o.code,o.joinCode,o.joincode,o.selfservice?.code,o.selfService?.code];
-  return vals.some(v=>String(v??'').replace(/\D/g,'')===code);
-}
-function looksLikeTableMap(o){
-  if(!o||typeof o!=='object')return false;
-  const a=entries(o); return a.some(x=>x&&typeof x==='object'&&(isTable(x)||isBank(x)));
-}
-function pickRestaurantConfig(root, code){
-  if(looksLikeRestaurantObject(root,code)) return {key:null,data:root};
-  for(const [key,val] of Object.entries(root||{})){
-    if(looksLikeRestaurantObject(val,code)) return {key,data:val};
-  }
-  return null;
-}
 async function readAny(path){
   try{return (await firebase.database().ref(path).once('value')).val()}catch(e){return null}
 }
-async function findRestaurant(code){
-  const cfg=await readAny('restaurant-selfserviceconfig');
-  const hit=pickRestaurantConfig(cfg,code);
-  if(hit) return {id:hit.key||hit.data.id||hit.data.restaurantId||hit.data.restaurantID||null,data:hit.data,source:'restaurant-selfserviceconfig'};
-  if(cfg&&typeof cfg==='object'&&cfg[code]) return {id:cfg[code].restaurantId||cfg[code].id||code,data:cfg[code],source:'restaurant-selfserviceconfig'};
-  const old=await readAny('restaurants');
-  const oldHit=pickRestaurantConfig(old,code);
-  if(oldHit) return {id:oldHit.key||oldHit.data.id||oldHit.data.restaurantId||null,data:oldHit.data,source:'restaurants'};
-  return null;
-}
-function candidateKey(st){
-  return [st.key,st.restaurant?.id,st.restaurant?.restaurantId,st.restaurant?.restaurantID,st.restaurant?.slug,st.restaurant?.naam,st.restaurant?.name].filter(v=>v!==null&&v!==undefined).map(String);
-}
-function findNestedForKeys(root, keys){
-  if(!root||typeof root!=='object')return null;
-  const lower=new Set(keys.map(x=>String(x).toLowerCase()));
-  for(const [k,v] of Object.entries(root)) if(lower.has(String(k).toLowerCase())) return v;
-  for(const [k,v] of Object.entries(root)){
-    if(v&&typeof v==='object'){
-      for(const key of keys) if(String(v.restaurantId??v.restaurantID??v.id??'').toLowerCase()===String(key).toLowerCase()) return v;
-    }
+
+// ---- Restaurant vinden: de QR-link bevat al de echte restaurant-ID (?id=...). ----
+async function findRestaurant(){
+  const id=getRestaurantId();
+  if(id){
+    const data=await readAny('restaurants/'+id);
+    if(data) return {id,data};
+  }
+  // Fallback voor oude links zonder id: zoek op de 5-cijferige selfserviceCode.
+  const code=getCode();
+  if(!code) return null;
+  const all=await readAny('restaurants');
+  for(const [key,val] of Object.entries(all||{})){
+    if(val && String(val.selfserviceCode??'')===code) return {id:key,data:val};
   }
   return null;
 }
-async function loadBranch(baseName, fallbackNames=[]){
-  const names=[baseName,...fallbackNames];
-  for(const name of names){
-    const root=await readAny(name); if(root==null)continue;
-    const nested=findNestedForKeys(root,candidateKey(st));
-    if(nested!=null)return nested;
-    if(looksLikeTableMap(root) || entries(root).some(x=>x&&typeof x==='object'&&(x.price!==undefined||x.prijs!==undefined||x.name!==undefined||x.naam!==undefined))) return root;
+
+// ---- Producten & plattegrond: eerst de kant-en-klare zelfservice-spiegel proberen
+// (bijgehouden door het beheerpaneel), met een fallback die zelf products/categories
+// resp. floorplan/tables samenvoegt als die spiegel nog niet (bij)gewerkt is. ----
+async function loadProducts(id){
+  const mirror=await readAny('restaurants/'+id+'/selfserviceconfig/producten');
+  if(mirror && Object.keys(mirror).length) return mirror;
+  const [products,categories]=await Promise.all([readAny('restaurants/'+id+'/products'),readAny('restaurants/'+id+'/categories')]);
+  const out={};
+  for(const [key,p] of Object.entries(products||{})){
+    if(!p||!p.label) continue;
+    const catNaam=(p.categorie&&categories&&categories[p.categorie])?categories[p.categorie].naam:'Overig';
+    out[key]={originalId:key,label:p.label,emoji:p.emoji||'',price:p.price||0,bestemming:p.bestemming||'keuken',categorie:catNaam,opties:Array.isArray(p.opties)?p.opties:[]};
   }
-  return {};
+  return out;
 }
-function extractLayout(root){
-  if(!root||typeof root!=='object')return {};
-  for(const k of ['plattegrond','floorplan','tables','tafels']) if(root[k]&&typeof root[k]==='object') return root[k];
-  if(root.tables&&typeof root.tables==='object')return root.tables;
-  return root;
+async function loadLayout(id){
+  const mirror=await readAny('restaurants/'+id+'/selfserviceconfig/plattegrond');
+  if(mirror && Object.keys(mirror).length) return mirror;
+  const tables=await readAny('restaurants/'+id+'/floorplan/tables');
+  const out={};
+  for(const [key,t] of Object.entries(tables||{})){
+    if(!t||(t.kind!=='tafel'&&t.kind!=='bank')) continue;
+    const label=(t.kind==='bank'?'Bank ':'Tafel ')+(t.number||'');
+    out[key]={originalId:key,label,number:t.number||0,kind:t.kind,x:t.x,y:t.y};
+  }
+  return out;
 }
-function extractProducts(root){
-  if(!root||typeof root!=='object')return {};
-  for(const k of ['producten','products','menu','items']) if(root[k]&&typeof root[k]==='object')return root[k];
-  return root;
-}
+
+function productLabel(p){return p.label||'Product'}
+function price(p){return Number(p.price)||0}
+function isOutOfStock(p){return !!st.stock[p.originalId]}
+
 function renderFloorplan(){
   const g=$('tables'); g.innerHTML='';
-  const all=entries(st.layout).filter(x=>x&&typeof x==='object');
-  const banks=all.filter(isBank), tables=all.filter(isTable).sort((a,b)=>{
-    const an=Number(a.number??(String(a.id).match(/\d+/)?.[0])??99999), bn=Number(b.number??(String(b.id).match(/\d+/)?.[0])??99999); return an-bn;
-  });
+  const all=Object.values(st.layout).filter(t=>t&&typeof t==='object');
+  const tables=all.filter(t=>t.kind==='tafel').sort((a,b)=>(a.number||0)-(b.number||0));
+  const banks=all.filter(t=>t.kind==='bank').sort((a,b)=>(a.number||0)-(b.number||0));
   $('floorNote').textContent=(tables.length||banks.length)?`${tables.length} tafels, ${banks.length} banken`:'';
   const combined=[...tables,...banks];
-  if(!combined.length){g.innerHTML='<div class="empty" style="grid-column:1/-1"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="9" width="16" height="7" rx="1.5"/><path d="M6 16v2M18 16v2M4 9V7M20 9V7"/></svg><span>Geen tafels of banken gevonden. Vraag de bediening om je te helpen bestellen.</span></div>';return}
+  if(!combined.length){g.innerHTML='<div class="empty"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="9" width="16" height="7" rx="1.5"/><path d="M6 16v2M18 16v2M4 9V7M20 9V7"/></svg><span>Geen tafels of banken gevonden. Vraag de bediening om je te helpen bestellen.</span></div>';return}
   for(const t of combined){
     const b=document.createElement('button');b.className='tableplaque';b.type='button';
-    const label=tableLabel(t); const kind=isBank(t)?'Bank':'Tafel';
-    const num=label.replace(/^(tafel|bank|table|bench)\s*/i,'')||label;
-    b.innerHTML=`<span class="num">${esc(num)}</span><span class="kind">${esc(kind)}</span>`;
-    b.onclick=()=>{st.table=t;$('chosen').textContent=label;renderProducts();show('menuStep')};
+    const kind=t.kind==='bank'?'Bank':'Tafel';
+    b.innerHTML=`<span class="num">${esc(t.number)}</span><span class="kind">${esc(kind)}</span>`;
+    b.onclick=()=>{st.table=t;$('chosen').textContent=kind+' '+t.number;renderProducts();show('menuStep')};
     g.appendChild(b);
   }
 }
 function renderProducts(){
   const w=$('products');w.innerHTML='';
-  const a=entries(st.products).filter(p=>p&&typeof p==='object').filter(p=>p.actief!==false&&p.active!==false&&p.disabled!==true&&p.hidden!==true);
+  const a=Object.values(st.products).filter(p=>p&&typeof p==='object'&&p.label);
   if(!a.length){w.innerHTML='<div class="empty"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M8 10.5c0-2 4-2 4 0M8 14.5h8"/></svg><span>Geen producten gevonden op het menu. Vraag de bediening naar de kaart.</span></div>';return}
-  const gs={};for(const p of a){const c=p.categorie??p.category??p.group??'Menu';(gs[c]??=[]).push(p)}
+  const gs={};for(const p of a){const c=p.categorie||'Overig';(gs[c]??=[]).push(p)}
   for(const [cat,items] of Object.entries(gs)){
-    const dests=items.map(productDestination);
-    const isBarCat=dests.filter(d=>d==='bar').length>=dests.length/2;
+    const isBarCat=items.filter(p=>p.bestemming==='bar').length>=items.length/2;
     const h=document.createElement('h2');h.className='category';
     h.innerHTML=`<span class="dot${isBarCat?' is-bar':''}"></span>${esc(cat)}`;w.appendChild(h);
     const rule=document.createElement('div');rule.className='category-rule';w.appendChild(rule);
     for(const p of items){
-      const row=document.createElement('div');row.className='product-row';
-      const desc=p.omschrijving??p.description??p.beschrijving??'';
-      row.innerHTML=`<div class="product-top"><span class="product-name">${esc(productLabel(p))}</span><span class="leader"></span><span class="product-price">${euro(price(p))}</span></div>`+
-        (desc?`<div class="product-desc">${esc(desc)}</div>`:'')+
+      const out=isOutOfStock(p);
+      const row=document.createElement('div');row.className='product-row'+(out?' out':'');
+      row.innerHTML=`<div class="product-top"><span class="product-name">${p.emoji?p.emoji+' ':''}${esc(productLabel(p))}</span><span class="leader"></span><span class="product-price">${euro(price(p))}</span></div>`+
+        (out?'<div class="product-desc">Uitverkocht</div>':'')+
         `<div class="product-bottom"></div>`;
       const bottom=row.querySelector('.product-bottom');
-      const existing=st.cart.find(x=>x.id===p.id);
-      renderRowControl(bottom,p,existing?existing.q:0);
+      if(!out){
+        const existing=st.cart.find(x=>x.productKey===p.originalId);
+        renderRowControl(bottom,p,existing?existing.q:0);
+      }
       w.appendChild(row);
     }
   }
@@ -404,19 +366,19 @@ function renderRowControl(bottom,p,qty){
     const wrap=document.createElement('div');wrap.className='stepper';
     wrap.innerHTML=`<button type="button" aria-label="Minder">−</button><span class="qty">${qty}</span><button type="button" aria-label="Meer">+</button>`;
     const [minus,,plus]=wrap.children;
-    minus.onclick=()=>{const q=decFromCart(p.id);renderRowControl(bottom,p,q)};
-    plus.onclick=()=>{addToCart(p);renderRowControl(bottom,p,qtyOf(p.id))};
+    minus.onclick=()=>{const q=decFromCart(p.originalId);renderRowControl(bottom,p,q)};
+    plus.onclick=()=>{addToCart(p);renderRowControl(bottom,p,qtyOf(p.originalId))};
     bottom.appendChild(wrap);
   }
 }
-function qtyOf(id){const x=st.cart.find(x=>x.id===id);return x?x.q:0}
+function qtyOf(key){const x=st.cart.find(x=>x.productKey===key);return x?x.q:0}
 function addToCart(p){
-  const ex=st.cart.find(x=>x.id===p.id);
-  if(ex)ex.q++;else st.cart.push({id:p.id,n:productLabel(p),p:price(p),q:1,dest:productDestination(p)});
+  const ex=st.cart.find(x=>x.productKey===p.originalId);
+  if(ex)ex.q++;else st.cart.push({productKey:p.originalId,n:productLabel(p),p:price(p),q:1,bestemming:p.bestemming||'keuken'});
   updateCart();
 }
-function decFromCart(id){
-  const i=st.cart.findIndex(x=>x.id===id);
+function decFromCart(key){
+  const i=st.cart.findIndex(x=>x.productKey===key);
   if(i<0)return 0;
   st.cart[i].q--;
   const q=st.cart[i].q;
@@ -440,45 +402,26 @@ function orderError(msg){
   if(!msg){box.hidden=true;box.textContent='';return}
   box.hidden=false;box.textContent=msg;
 }
+// Schrijft de bestelling exact zoals het beheerpaneel dat zelf doet:
+// naar restaurants/<id>/orders, met items als {productKey: aantal}. Het
+// beheerpaneel bepaalt zelf, per product se "bestemming", of dit naar de
+// Keuken- of Bar-tab gaat — daar hoeven wij niets voor te doen.
 async function placeOrder(){
   if(!st.table||!st.cart.length)return;
   orderError('');
   const place=$('place');place.disabled=true;place.textContent='Bezig met plaatsen…';
   try{
-    const tableNum=Number(st.table.number??(String(st.table.id).match(/\d+/)?.[0])??0);
-    const groups={};
-    for(const x of st.cart){(groups[x.dest||'keuken']??=[]).push({productId:x.id,name:x.n,price:x.p,quantity:x.q})}
-    const basePath='restaurants/'+(st.key||'')+'/selfserviceconfig/bestelde dingen/';
-    const attempts=Object.entries(groups).map(async ([dest,items])=>{
-      const order={items,status:'nieuw',tableNumber:tableNum,tijd:firebase.database.ServerValue.TIMESTAMP};
-      const path=st.key?(basePath+dest):('restaurant-selfserviceconfig-bestellingen/'+dest);
-      console.log('Bestelling wegschrijven naar',path,order);
-      try{
-        await firebase.database().ref(path).push(order);
-        return {dest,ok:true};
-      }catch(e){
-        console.error('Push naar',path,'mislukt:',e);
-        return {dest,ok:false,error:e};
-      }
-    });
-    const results=await Promise.all(attempts);
-    const failed=results.filter(r=>!r.ok);
-    const succeeded=results.filter(r=>r.ok);
-    if(failed.length){
-      const detail=failed.map(f=>`${f.dest}: ${f.error?.code||f.error?.message||f.error}`).join(' — ');
-      orderError('Kon niet alles versturen ('+detail+'). Controleer de Firebase-rules voor het pad "bestelde dingen/'+failed.map(f=>f.dest).join('/')+'". Open de browserconsole (F12) voor het volledige foutbericht.');
-      if(succeeded.length){
-        st.cart=st.cart.filter(x=>!succeeded.some(s=>s.dest===(x.dest||'keuken')));
-        updateCart();renderProducts();
-      }
-      return;
-    }
+    const items={};
+    for(const x of st.cart) items[x.productKey]=(items[x.productKey]||0)+x.q;
+    const order={tableNumber:st.table.number,items,status:'nieuw',tijd:Date.now()};
+    console.log('Bestelling wegschrijven naar restaurants/'+st.key+'/orders',order);
+    await firebase.database().ref('restaurants/'+st.key+'/orders').push(order);
     st.cart=[];updateCart();$('cart').hidden=true;
-    $('doneText').textContent='Bestelling geplaatst voor '+tableLabel(st.table)+'.';
+    $('doneText').textContent='Bestelling geplaatst voor '+(st.table.kind==='bank'?'Bank ':'Tafel ')+st.table.number+'.';
     show('doneStep');
   }catch(e){
-    console.error(e);
-    orderError('Bestelling mislukt: '+(e?.message||e));
+    console.error('Bestelling plaatsen mislukt:',e);
+    orderError('Bestelling mislukt: '+(e?.code||e?.message||e)+'. Open de browserconsole (F12) voor details, en controleer de Firebase-rules voor het pad "orders".');
   }finally{
     place.disabled=false;place.textContent='Bestelling plaatsen';
   }
@@ -495,23 +438,21 @@ async function boot(){
   try{
     await waitForFirebase();
     firebase.initializeApp(firebaseConfig);
-    st.code=getCode();
-    if(!st.code){status('QR-code ontbreekt','Open deze pagina via de QR-code van het restaurant.','Geen 5-cijferige selfservicecode gevonden in de URL.');return}
-    $('statusText').textContent='Restaurant zoeken met code '+st.code+'…';
-    const f=await findRestaurant(st.code);
-    if(!f){status('Restaurant niet gevonden','Geen configuratie gevonden met code '+st.code,'Gezocht in restaurant-selfserviceconfig en als fallback restaurants.');return}
-    st.key=f.id;st.restaurant=f.data||{};$('restaurant').textContent=st.restaurant.naam||st.restaurant.name||st.restaurant.restaurantName||'Zelfservice';
+    const f=await findRestaurant();
+    if(!f){status('Restaurant niet gevonden','Deze link lijkt niet meer geldig te zijn.','Geen restaurant gevonden voor id="'+getRestaurantId()+'" (of code="'+getCode()+'").');return}
+    st.key=f.id;st.restaurant=f.data||{};$('restaurant').textContent=st.restaurant.naam||'Zelfservice';
 
-    const layoutRaw=await loadBranch('restaurant-selfserviceconfig-plattegrond',['restaurant-selfserviceconfig-plattegrond/'+(st.key||''),'restaurants/'+(st.key||'')+'/selfserviceconfig/plattegrond','restaurants/'+(st.key||'')+'/plattegrond']);
-    const productsRaw=await loadBranch('restaurant-selfserviceconfig-producten',['restaurant-selfserviceconfig-producten/'+(st.key||''),'restaurants/'+(st.key||'')+'/selfserviceconfig/producten','restaurants/'+(st.key||'')+'/producten']);
-    st.layout=extractLayout(layoutRaw);st.products=extractProducts(productsRaw);
-    st.ordersPath=st.key?('restaurants/'+st.key+'/selfserviceconfig/bestelde dingen'):'restaurant-selfserviceconfig-bestellingen';
+    const [layout,products,stock]=await Promise.all([
+      loadLayout(st.key),
+      loadProducts(st.key),
+      readAny('restaurants/'+st.key+'/stock')
+    ]);
+    st.layout=layout;st.products=products;st.stock=stock||{};
     renderFloorplan();renderProducts();show('tablesStep');
 
-    const layoutRef=st.key?firebase.database().ref('restaurants/'+st.key+'/selfserviceconfig/plattegrond'):firebase.database().ref('restaurant-selfserviceconfig-plattegrond');
-    const productRef=st.key?firebase.database().ref('restaurants/'+st.key+'/selfserviceconfig/producten'):firebase.database().ref('restaurant-selfserviceconfig-producten');
-    layoutRef.on('value',s=>{if(s.val()!=null){st.layout=extractLayout(s.val());renderFloorplan()}});
-    productRef.on('value',s=>{if(s.val()!=null){st.products=extractProducts(s.val());renderProducts()}});
+    firebase.database().ref('restaurants/'+st.key+'/selfserviceconfig/plattegrond').on('value',s=>{if(s.val()!=null){st.layout=s.val();renderFloorplan()}});
+    firebase.database().ref('restaurants/'+st.key+'/selfserviceconfig/producten').on('value',s=>{if(s.val()!=null){st.products=s.val();renderProducts()}});
+    firebase.database().ref('restaurants/'+st.key+'/stock').on('value',s=>{st.stock=s.val()||{};renderProducts()});
   }catch(e){console.error(e);status('Zelfservice kan niet starten','Firebase kon niet worden geladen of gelezen.',String(e?.stack||e))}
 }
 document.addEventListener('DOMContentLoaded',()=>{
@@ -520,7 +461,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('cartOpen').onclick=openCart;$('cartClose').onclick=()=>$('cart').hidden=true;
   $('place').onclick=placeOrder;
   $('new').onclick=()=>show('tablesStep');
-  const watchdog=setTimeout(()=>{if(!$('loading').hidden){status('Verbinden duurt te lang','De gegevens van het restaurant konden niet binnen 8 seconden worden opgehaald.','Controleer de QR-code en Firebase Rules. Open browserconsole voor meer details.')}},8000);
+  const watchdog=setTimeout(()=>{if(!$('loading').hidden){status('Verbinden duurt te lang','De gegevens van het restaurant konden niet binnen 8 seconden worden opgehaald.','Controleer de link en Firebase Rules. Open browserconsole voor meer details.')}},8000);
   boot().finally(()=>clearTimeout(watchdog));
 });
 </script>
