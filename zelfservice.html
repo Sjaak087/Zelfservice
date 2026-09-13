@@ -37,7 +37,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(18,15,12,.86);backdrop-f
 .headrow{padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}
 .brand{display:flex;align-items:center;gap:14px;min-width:0}.logo{width:46px;height:46px;border-radius:15px;background:linear-gradient(145deg,#34251b,#17110d);color:var(--accent);display:grid;place-items:center;font-weight:800;font-size:17px;box-shadow:0 8px 24px rgba(16,17,20,.18)}
 .restaurant{font-size:18px;font-weight:800;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.subtle{font-size:12px;color:var(--ink-soft);margin-top:3px}
-nav{display:flex;gap:8px;flex-wrap:wrap}nav button{border:1px solid transparent;background:transparent;color:var(--ink-soft);padding:9px 13px;border-radius:999px;cursor:pointer;font-size:13px;font-weight:700}nav button:hover{background:#251b14;border-color:var(--line);color:var(--ink)}nav button.active{background:linear-gradient(135deg,#d8a64a,#a86f22);color:#1a120b}nav button[data-count]::after{content:attr(data-count);margin-left:6px;display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:#2c2118;color:#f5dfb3;font-size:10px}nav button.active[data-count]::after{background:rgba(26,18,11,.18);color:#1a120b}.placed-wrap{display:grid;gap:12px}.order-card{background:linear-gradient(180deg,#211913,#17120f);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 10px 28px rgba(0,0,0,.18)}.order-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.order-meta{font-size:11px;color:var(--ink-soft);margin-top:4px}.status-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap;border:1px solid #4a392c;background:#2a1d14;color:#f0dfc0}.status-dot{width:7px;height:7px;border-radius:50%;background:#d8a64a}.status-pill.preparing{border-color:#594b72;background:#28203a;color:#d7c8fa}.status-pill.preparing .status-dot{background:#9b7be1}.status-pill.ready{border-color:#315b49;background:#173126;color:#9ce0bd}.status-pill.ready .status-dot{background:#70c898}.order-items{display:grid;gap:8px;margin-top:14px}.order-item{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(90,70,50,.5)}.order-item:last-child{border-bottom:0}.order-item-name{font-weight:700}.order-item-dest{font-size:10px;color:var(--ink-soft);margin-top:3px}.order-total{display:flex;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-weight:850}.placed-empty{padding:25px;text-align:center;background:#1b1511;border:1px dashed #5a4636;border-radius:16px;color:var(--ink-soft);line-height:1.6}.live-note{font-size:11px;color:#aa9b88;margin-top:8px}
+nav{display:flex;gap:8px;flex-wrap:wrap}nav button{border:1px solid transparent;background:transparent;color:var(--ink-soft);padding:9px 13px;border-radius:999px;cursor:pointer;font-size:13px;font-weight:700}nav button:hover{background:#251b14;border-color:var(--line);color:var(--ink)}nav button.active{background:linear-gradient(135deg,#d8a64a,#a86f22);color:#1a120b}nav button[data-count]::after{content:attr(data-count);margin-left:6px;display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:#2c2118;color:#f5dfb3;font-size:10px}nav button.active[data-count]::after{background:rgba(26,18,11,.18);color:#1a120b}#placedNav{border-color:#5b452f;background:#21170f;color:#e8d0a2}#placedNav:hover{background:#2d2015;color:#f5dfb3}#placedNav.active{background:linear-gradient(135deg,#d8a64a,#a86f22);color:#1a120b}.placed-wrap{display:grid;gap:12px}.order-card{background:linear-gradient(180deg,#211913,#17120f);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 10px 28px rgba(0,0,0,.18)}.order-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.order-meta{font-size:11px;color:var(--ink-soft);margin-top:4px}.status-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap;border:1px solid #4a392c;background:#2a1d14;color:#f0dfc0}.status-dot{width:7px;height:7px;border-radius:50%;background:#d8a64a}.status-pill.preparing{border-color:#594b72;background:#28203a;color:#d7c8fa}.status-pill.preparing .status-dot{background:#9b7be1}.status-pill.ready{border-color:#315b49;background:#173126;color:#9ce0bd}.status-pill.ready .status-dot{background:#70c898}.order-items{display:grid;gap:8px;margin-top:14px}.order-item{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(90,70,50,.5)}.order-item:last-child{border-bottom:0}.order-item-name{font-weight:700}.order-item-dest{font-size:10px;color:var(--ink-soft);margin-top:3px}.order-total{display:flex;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-weight:850}.placed-empty{padding:25px;text-align:center;background:#1b1511;border:1px dashed #5a4636;border-radius:16px;color:var(--ink-soft);line-height:1.6}.live-note{font-size:11px;color:#aa9b88;margin-top:8px}
 main{padding:34px 24px 140px}.hero{display:flex;flex-direction:column;gap:6px;margin-bottom:24px}h1{font-size:clamp(30px,4vw,46px);line-height:1.02;letter-spacing:-.045em;margin:0;font-weight:850}p{color:var(--ink-soft);line-height:1.65;margin:0;max-width:62ch}.chosen-row{display:flex;align-items:center;gap:9px;margin-top:10px;color:var(--ink-soft)}.chosen-row .val{background:#2a1d14;color:#f8f1e5;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800}
 .center{padding:92px 18px;text-align:center}.loadingmark{width:48px;height:48px;border:4px solid #342820;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 22px}@keyframes spin{to{transform:rotate(360deg)}}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px}.tableplaque{border:1px solid var(--line);background:linear-gradient(180deg,#211913,#17120e);border-radius:18px;padding:18px;min-height:118px;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 12px 30px rgba(0,0,0,.2);transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}.tableplaque:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#6a4b2e}.tableplaque .num{font-size:32px;font-weight:850;letter-spacing:-.04em}.tableplaque .kind{font-size:12px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.08em}.floor-note{font-size:12px;color:var(--ink-soft);margin:-6px 0 18px}
@@ -66,7 +66,7 @@ main{padding:34px 24px 140px}.hero{display:flex;flex-direction:column;gap:6px;ma
       <nav>
         <button class="active" id="tablesNav" type="button">Tafel</button>
         <button id="menuNav" type="button">Menu</button>
-        <button id="placedNav" type="button">Geplaatst</button>
+        <button id="placedNav" type="button" aria-label="Eerder geplaatste bestellingen">Eerder geplaatst</button>
       </nav>
     </div>
   </header>
@@ -87,6 +87,9 @@ main{padding:34px 24px 140px}.hero{display:flex;flex-direction:column;gap:6px;ma
         <p>Kies je tafel of bank om het menu te openen.</p>
       </div>
       <div class="floor-note" id="floorNote"></div>
+      <div style="display:flex;justify-content:flex-end;margin:-4px 0 16px">
+        <button class="btn secondary" type="button" id="placedQuickFromTables">🧾 Eerder geplaatste bestellingen</button>
+      </div>
       <div class="grid" id="tables"></div>
     </section>
 
@@ -94,6 +97,9 @@ main{padding:34px 24px 140px}.hero{display:flex;flex-direction:column;gap:6px;ma
       <div class="hero">
         <h1>Menu</h1>
         <div class="chosen-row"><p style="margin:0">Je bestelt voor</p><span class="val" id="chosen">geen tafel</span></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin:0 0 16px">
+        <button class="btn secondary" type="button" id="placedQuickFromMenu">🧾 Eerder geplaatste bestellingen</button>
       </div>
       <div id="products" class="menu-list"></div>
     </section>
@@ -562,6 +568,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('tablesNav').onclick=()=>{if(st.table||!$('tablesStep').hidden)show('tablesStep')};
   $('menuNav').onclick=()=>{if(st.table)show('menuStep')};
   $('placedNav').onclick=()=>{if(st.key){startPlacedOrdersListener();show('placedStep')}};
+  $('placedQuickFromTables').onclick=()=>{if(st.key){startPlacedOrdersListener();show('placedStep')}};
+  $('placedQuickFromMenu').onclick=()=>{if(st.key){startPlacedOrdersListener();show('placedStep')}};
   $('cartOpen').onclick=openCart;$('cartClose').onclick=()=>$('cart').hidden=true;
   $('place').onclick=placeOrder;
   $('new').onclick=()=>show('menuStep');
