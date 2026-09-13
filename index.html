@@ -339,9 +339,15 @@ function updateCart(){
   st.cart.forEach(x=>{const d=x.bestemming||'keuken';routes[d]=(routes[d]||0)+x.q});
   $('count').textContent=n;
   $('total').textContent=euro(t);
-  $('routeLabel').textContent=n?(Object.keys(routes).length>1?'naar bar + keuken':'naar '+(Object.keys(routes)[0]==='bar'?'de bar':'de keuken')):'klaar om te versturen';
-  $('routeSummary').innerHTML=Object.entries(routes).map(([d,q])=>`<span class="route-chip ${d==='bar'?'bar':''}">${d==='bar'?'Bar':'Keuken'} · ${q}</span>`).join('');
-  $('cartBar').hidden=!n
+  const routeLabel=$('routeLabel');
+  const routeSummary=$('routeSummary');
+  if(routeLabel){
+    routeLabel.textContent=n?(Object.keys(routes).length>1?'naar bar + keuken':'naar '+(Object.keys(routes)[0]==='bar'?'de bar':'de keuken')):'klaar om te versturen';
+  }
+  if(routeSummary){
+    routeSummary.innerHTML=Object.entries(routes).map(([d,q])=>`<span class="route-chip ${d==='bar'?'bar':''}">${d==='bar'?'Bar':'Keuken'} · ${q}</span>`).join('');
+  }
+  $('cartBar').hidden=!n;
 }
 function openCart(){
   const w=$('cartItems');w.innerHTML='';
