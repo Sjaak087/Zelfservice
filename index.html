@@ -37,7 +37,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(18,15,12,.86);backdrop-f
 .headrow{padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}
 .brand{display:flex;align-items:center;gap:14px;min-width:0}.logo{width:46px;height:46px;border-radius:15px;background:linear-gradient(145deg,#34251b,#17110d);color:var(--accent);display:grid;place-items:center;font-weight:800;font-size:17px;box-shadow:0 8px 24px rgba(16,17,20,.18)}
 .restaurant{font-size:18px;font-weight:800;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.subtle{font-size:12px;color:var(--ink-soft);margin-top:3px}
-nav{display:flex;gap:8px}nav button{border:1px solid transparent;background:transparent;color:var(--ink-soft);padding:9px 13px;border-radius:999px;cursor:pointer;font-size:13px;font-weight:700}nav button:hover{background:#251b14;border-color:var(--line);color:var(--ink)}nav button.active{background:linear-gradient(135deg,#d8a64a,#a86f22);color:#1a120b}
+nav{display:flex;gap:8px;flex-wrap:wrap}nav button{border:1px solid transparent;background:transparent;color:var(--ink-soft);padding:9px 13px;border-radius:999px;cursor:pointer;font-size:13px;font-weight:700}nav button:hover{background:#251b14;border-color:var(--line);color:var(--ink)}nav button.active{background:linear-gradient(135deg,#d8a64a,#a86f22);color:#1a120b}nav button[data-count]::after{content:attr(data-count);margin-left:6px;display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:#2c2118;color:#f5dfb3;font-size:10px}nav button.active[data-count]::after{background:rgba(26,18,11,.18);color:#1a120b}#placedNav{border-color:#5b452f;background:#21170f;color:#e8d0a2}#placedNav:hover{background:#2d2015;color:#f5dfb3}#placedNav.active{background:linear-gradient(135deg,#d8a64a,#a86f22);color:#1a120b}.placed-wrap{display:grid;gap:12px}.order-card{background:linear-gradient(180deg,#211913,#17120f);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 10px 28px rgba(0,0,0,.18)}.order-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.order-meta{font-size:11px;color:var(--ink-soft);margin-top:4px}.status-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap;border:1px solid #4a392c;background:#2a1d14;color:#f0dfc0}.status-dot{width:7px;height:7px;border-radius:50%;background:#d8a64a}.status-pill.preparing{border-color:#594b72;background:#28203a;color:#d7c8fa}.status-pill.preparing .status-dot{background:#9b7be1}.status-pill.ready{border-color:#315b49;background:#173126;color:#9ce0bd}.status-pill.ready .status-dot{background:#70c898}.order-items{display:grid;gap:8px;margin-top:14px}.order-item{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(90,70,50,.5)}.order-item:last-child{border-bottom:0}.order-item-name{font-weight:700}.order-item-dest{font-size:10px;color:var(--ink-soft);margin-top:3px}.order-total{display:flex;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-weight:850}.placed-empty{padding:25px;text-align:center;background:#1b1511;border:1px dashed #5a4636;border-radius:16px;color:var(--ink-soft);line-height:1.6}.live-note{font-size:11px;color:#aa9b88;margin-top:8px}
 main{padding:34px 24px 140px}.hero{display:flex;flex-direction:column;gap:6px;margin-bottom:24px}h1{font-size:clamp(30px,4vw,46px);line-height:1.02;letter-spacing:-.045em;margin:0;font-weight:850}p{color:var(--ink-soft);line-height:1.65;margin:0;max-width:62ch}.chosen-row{display:flex;align-items:center;gap:9px;margin-top:10px;color:var(--ink-soft)}.chosen-row .val{background:#2a1d14;color:#f8f1e5;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800}
 .center{padding:92px 18px;text-align:center}.loadingmark{width:48px;height:48px;border:4px solid #342820;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 22px}@keyframes spin{to{transform:rotate(360deg)}}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px}.tableplaque{border:1px solid var(--line);background:linear-gradient(180deg,#211913,#17120e);border-radius:18px;padding:18px;min-height:118px;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 12px 30px rgba(0,0,0,.2);transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}.tableplaque:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#6a4b2e}.tableplaque .num{font-size:32px;font-weight:850;letter-spacing:-.04em}.tableplaque .kind{font-size:12px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.08em}.floor-note{font-size:12px;color:var(--ink-soft);margin:-6px 0 18px}
@@ -66,6 +66,7 @@ main{padding:34px 24px 140px}.hero{display:flex;flex-direction:column;gap:6px;ma
       <nav>
         <button class="active" id="tablesNav" type="button">Tafel</button>
         <button id="menuNav" type="button">Menu</button>
+        <button id="placedNav" type="button" aria-label="Eerder geplaatste bestellingen">Eerder geplaatst</button>
       </nav>
     </div>
   </header>
@@ -86,6 +87,9 @@ main{padding:34px 24px 140px}.hero{display:flex;flex-direction:column;gap:6px;ma
         <p>Kies je tafel of bank om het menu te openen.</p>
       </div>
       <div class="floor-note" id="floorNote"></div>
+      <div style="display:flex;justify-content:flex-end;margin:-4px 0 16px">
+        <button class="btn secondary" type="button" id="placedQuickFromTables">🧾 Eerder geplaatste bestellingen</button>
+      </div>
       <div class="grid" id="tables"></div>
     </section>
 
@@ -94,7 +98,19 @@ main{padding:34px 24px 140px}.hero{display:flex;flex-direction:column;gap:6px;ma
         <h1>Menu</h1>
         <div class="chosen-row"><p style="margin:0">Je bestelt voor</p><span class="val" id="chosen">geen tafel</span></div>
       </div>
+      <div style="display:flex;justify-content:flex-end;margin:0 0 16px">
+        <button class="btn secondary" type="button" id="placedQuickFromMenu">🧾 Eerder geplaatste bestellingen</button>
+      </div>
       <div id="products" class="menu-list"></div>
+    </section>
+
+    <section id="placedStep" hidden>
+      <div class="hero">
+        <h1>Geplaatste bestellingen</h1>
+        <p>Hier zie je je actieve bestellingen en live de fase waarin ze zitten.</p>
+        <div class="live-note">Binnengekomen → In bereiding → Gemaakt</div>
+      </div>
+      <div id="placedOrders" class="placed-wrap"></div>
     </section>
 
     <section id="doneStep" hidden>
@@ -137,7 +153,8 @@ const firebaseConfig={apiKey:"AIzaSyBVwx6eUdSkebGIK2J_NDwOD3rxTcIg1v4",authDomai
 const $=id=>document.getElementById(id);
 const esc=v=>{const d=document.createElement('div');d.textContent=v??'';return d.innerHTML};
 const euro=v=>'€ '+(Number(v)||0).toFixed(2).replace('.',',');
-const st={key:null,restaurant:null,layout:{},products:{},stock:{},table:null,cart:[]};
+const st={key:null,restaurant:null,layout:{},products:{},stock:{},table:null,cart:[],activeOrderGroups:[]};
+let placedOrdersRef=null;
 
 function getRestaurantId(){
   const u=new URL(location.href);
@@ -147,12 +164,17 @@ function getRestaurantId(){
 function getCode(){
   const u=new URL(location.href);
   for(const k of ['selfservicecode','selfServiceCode','selfserviceCode','code','joinCode','joincode']){
-    const v=u.searchParams.get(k); if(/^\d{5}$/.test(v||'')) return v;
+    const v=(u.searchParams.get(k)||'').trim();
+    // Ondersteunt zowel oudere numerieke codes als de huidige 6-teken restaurantcode.
+    if(/^[A-Za-z0-9]{5,10}$/.test(v)) return v.toUpperCase();
   }
   return '';
 }
-function show(x){for(const id of ['loading','tablesStep','menuStep','doneStep'])$(id).hidden=id!==x;
-  if(x==='tablesStep'||x==='menuStep'){$('tablesNav').classList.toggle('active',x==='tablesStep');$('menuNav').classList.toggle('active',x==='menuStep')}
+function show(x){for(const id of ['loading','tablesStep','menuStep','placedStep','doneStep'])$(id).hidden=id!==x;
+  $('tablesNav').classList.toggle('active',x==='tablesStep');
+  $('menuNav').classList.toggle('active',x==='menuStep');
+  $('placedNav').classList.toggle('active',x==='placedStep');
+  if(x==='placedStep') renderPlacedOrders();
 }
 function status(a,b,c=''){ $('statusTitle').textContent=a;$('statusText').textContent=b;$('debug').textContent=c;$('debug').hidden=!c }
 
@@ -311,21 +333,25 @@ function renderRowControl(bottom,p,qty){
     bottom.appendChild(wrap);
   }
 }
-function qtyOf(key){const x=st.cart.find(x=>x.productKey===key);return x?x.q:0}
+function qtyOf(key){const x=st.cart.find(x=>String(x.productKey)===String(key));return x?x.q:0}
 function addToCart(p){
-  const ex=st.cart.find(x=>x.productKey===p.originalId);
-  if(ex)ex.q++;
-  else st.cart.push({
-    productKey:p.originalId,
-    n:productLabel(p),
-    p:price(p),
-    q:1,
-    bestemming:destinationFromProduct(p,'keuken')
-  });
+  const key=String(p?.originalId ?? p?.key ?? '');
+  if(!key) { console.error('Product zonder geldige sleutel', p); return; }
+  const ex=st.cart.find(x=>String(x.productKey)===key);
+  if(ex){
+    ex.q+=1;
+  } else {
+    st.cart.push({
+      productKey:key,
+      n:productLabel(p),
+      p:price(p),
+      q:1
+    });
+  }
   updateCart();
 }
 function decFromCart(key){
-  const i=st.cart.findIndex(x=>x.productKey===key);
+  const i=st.cart.findIndex(x=>String(x.productKey)===String(key));
   if(i<0)return 0;
   st.cart[i].q--;
   const q=st.cart[i].q;
@@ -333,21 +359,14 @@ function decFromCart(key){
   updateCart();return q;
 }
 function updateCart(){
-  const n=st.cart.reduce((s,x)=>s+x.q,0);
-  const t=st.cart.reduce((s,x)=>s+x.p*x.q,0);
-  const routes={};
-  st.cart.forEach(x=>{const d=x.bestemming||'keuken';routes[d]=(routes[d]||0)+x.q});
-  $('count').textContent=n;
-  $('total').textContent=euro(t);
-  const routeLabel=$('routeLabel');
-  const routeSummary=$('routeSummary');
-  if(routeLabel){
-    routeLabel.textContent=n?(Object.keys(routes).length>1?'naar bar + keuken':'naar '+(Object.keys(routes)[0]==='bar'?'de bar':'de keuken')):'klaar om te versturen';
-  }
-  if(routeSummary){
-    routeSummary.innerHTML=Object.entries(routes).map(([d,q])=>`<span class="route-chip ${d==='bar'?'bar':''}">${d==='bar'?'Bar':'Keuken'} · ${q}</span>`).join('');
-  }
-  $('cartBar').hidden=!n;
+  const n=st.cart.reduce((sum,x)=>sum+(Number(x.q)||0),0);
+  const t=st.cart.reduce((sum,x)=>sum+(Number(x.p)||0)*(Number(x.q)||0),0);
+  const countEl=$('count');
+  const totalEl=$('total');
+  const barEl=$('cartBar');
+  if(countEl) countEl.textContent=String(n);
+  if(totalEl) totalEl.textContent=euro(t);
+  if(barEl) barEl.hidden=n===0;
 }
 function openCart(){
   const w=$('cartItems');w.innerHTML='';
@@ -369,14 +388,27 @@ function orderError(msg){
 // naar restaurants/<id>/orders, met items als {productKey: aantal}. Het
 // beheerpaneel bepaalt zelf, per product se "bestemming", of dit naar de
 // Keuken- of Bar-tab gaat — daar hoeven wij niets voor te doen.
+function orderStatusLabel(status){
+  if(status==='bereiden') return 'In bereiding';
+  if(status==='klaar') return 'Gemaakt';
+  return 'Binnengekomen';
+}
+function orderStatusClass(status){
+  if(status==='bereiden') return 'preparing';
+  if(status==='klaar') return 'ready';
+  return '';
+}
+function savedOrderGroups(){
+  try{return JSON.parse(localStorage.getItem('zelfserviceOrderGroups_'+st.key)||'[]').filter(Boolean)}catch(e){return []}
+}
+function saveOrderGroups(){
+  localStorage.setItem('zelfserviceOrderGroups_'+st.key,JSON.stringify(st.activeOrderGroups.slice(-20)));
+}
 async function placeOrder(){
   if(!st.table||!st.cart.length)return;
   orderError('');
-  const place=$('place'); place.disabled=true; place.textContent='Routing controleren…';
+  const place=$('place'); place.disabled=true; place.textContent='Bestelling plaatsen…';
   try{
-    // Altijd opnieuw uit dit specifieke restaurant lezen. De instelling op
-    // products/<productId>/bestemming is leidend; een oude selfservice-cache
-    // mag nooit bepalen waar een product terechtkomt.
     const liveProducts=await readAny('restaurants/'+st.key+'/products');
     const groups={keuken:{items:{},regels:[]},bar:{items:{},regels:[]}};
     for(const x of st.cart){
@@ -385,37 +417,125 @@ async function placeOrder(){
       const bestemming=destinationFromProduct(live,destinationFromProduct(fallback,'keuken'))==='bar'?'bar':'keuken';
       if(!groups[bestemming].items[x.productKey]) groups[bestemming].items[x.productKey]=0;
       groups[bestemming].items[x.productKey]+=x.q;
-      groups[bestemming].regels.push({productKey:x.productKey,aantal:x.q,bestemming,product:x.n});
+      groups[bestemming].regels.push({productKey:x.productKey,aantal:x.q,bestemming,product:x.n,emoji:(live?.emoji||fallback?.emoji||'')});
     }
-
     const groupEntries=Object.entries(groups).filter(([,g])=>Object.keys(g.items).length>0);
-    const orderGroupId=groupEntries.length>1
-      ? firebase.database().ref('restaurants/'+st.key+'/orders').push().key
-      : null;
+    const orderGroupId=firebase.database().ref('restaurants/'+st.key+'/orders').push().key;
     const basePush=st.table.kind==='bank'?'bank':'tafel';
     for(const [bestemming,g] of groupEntries){
       const id=firebase.database().ref('restaurants/'+st.key+'/orders').push().key;
+      const itemDetails={};
+      g.regels.forEach(r=>{
+        const p=liveProducts?.[r.productKey]||st.products[r.productKey]||{};
+        itemDetails[r.productKey]={label:r.product||p.label||r.productKey,emoji:p.emoji||r.emoji||'',price:Number(p.price)||0,bestemming:r.bestemming};
+      });
       const order={
         tableNumber:st.table.number,
         tableKind:basePush,
         items:g.items,
         regels:g.regels,
+        itemDetails,
         bestemming,
+        orderGroupId,
         status:'nieuw',
         tijd:firebase.database.ServerValue.TIMESTAMP
       };
-      if(orderGroupId) order.orderGroupId=orderGroupId;
       await firebase.database().ref('restaurants/'+st.key+'/orders/'+id).set(order);
     }
-
+    st.activeOrderGroups=[...new Set([...st.activeOrderGroups,orderGroupId])];
+    saveOrderGroups();
     st.cart=[]; updateCart(); $('cart').hidden=true;
-    const sent=groupEntries.map(([d,g])=>`${g.regels.reduce((n,r)=>n+r.aantal,0)} naar ${d==='bar'?'de bar':'de keuken'}`).join(' en ');
-    $('doneText').textContent='Bestelling voor '+(st.table.kind==='bank'?'Bank ':'Tafel ')+st.table.number+' verstuurd: '+sent+'.';
-    show('doneStep');
+    startPlacedOrdersListener();
+    $('doneText').textContent='Bestelling voor '+(st.table.kind==='bank'?'Bank ':'Tafel ')+st.table.number+' is geplaatst.';
+    show('placedStep');
   }catch(e){
     console.error('Bestelling plaatsen mislukt:',e);
     orderError('Bestelling kon niet worden verstuurd: '+(e?.code||e?.message||e)+'. Controleer Firebase Rules voor restaurants/'+st.key+'/orders.');
   }finally{place.disabled=false;place.textContent='Bestelling versturen'}
+}
+function renderPlacedOrders(orders){
+  const w=$('placedOrders'); if(!w)return;
+  const list=orders||[];
+  if(!list.length){w.innerHTML='<div class="placed-empty">Nog geen actieve bestellingen voor deze tafel. Zodra je iets bestelt, verschijnt de voortgang hier automatisch.</div>';return}
+
+  // Groepeer bij voorkeur op orderGroupId. Oudere bestellingen hebben dat veld
+  // mogelijk niet; die krijgen hun eigen tijdelijke groep op basis van het order-id.
+  const groups={};
+  list.forEach(([id,o])=>{
+    const gid=o.orderGroupId || ('legacy-'+id);
+    (groups[gid]??=[]).push([id,o]);
+  });
+
+  const entries=Object.entries(groups).sort((a,b)=>{
+    const at=Math.min(...a[1].map(([,o])=>Number(o.tijd)||0));
+    const bt=Math.min(...b[1].map(([,o])=>Number(o.tijd)||0));
+    return bt-at;
+  });
+  w.innerHTML='';
+
+  for(const [gid,parts] of entries){
+    const statuses=parts.map(([,o])=>o.status||'nieuw');
+    const overall=statuses.every(s=>s==='klaar')?'klaar':statuses.some(s=>s==='bereiden')?'bereiden':'nieuw';
+    const first=parts[0][1];
+    const card=document.createElement('article'); card.className='order-card';
+    const itemLines=[];
+    let total=0;
+
+    parts.forEach(([,o])=>{
+      const phase=orderStatusLabel(o.status||'nieuw');
+      const phaseClass=orderStatusClass(o.status||'nieuw');
+      const destination=o.bestemming==='bar'?'Bar':'Keuken';
+      Object.entries(o.items||{}).forEach(([key,q])=>{
+        const d=(o.itemDetails&&o.itemDetails[key])||(st.products[key]||{});
+        const label=d.label||key;
+        const dest=(o.itemDetails?.[key]?.bestemming||o.bestemming||d.bestemming||'keuken');
+        const prijs=Number(d.price)||0;
+        total += prijs*(Number(q)||0);
+        itemLines.push(`<div class="order-item"><div><div class="order-item-name">${q}× ${esc(label)}</div><div class="order-item-dest">${dest==='bar'?'Bar':'Keuken'} · <span class="status-pill ${phaseClass}" style="padding:3px 7px;font-size:9px;vertical-align:middle"><span class="status-dot"></span>${phase}</span></div></div><div>${euro(prijs*Number(q||0))}</div></div>`);
+      });
+    });
+
+    const tableLabel=first.tableKind==='bank'?'Bank':'Tafel';
+    const hasBar=parts.some(([,o])=>o.bestemming==='bar'||Object.values(o.itemDetails||{}).some(d=>d&&d.bestemming==='bar'));
+    const hasKitchen=parts.some(([,o])=>o.bestemming!=='bar'||Object.values(o.itemDetails||{}).some(d=>d&&d.bestemming!=='bar'));
+    const routeLabel=hasBar && hasKitchen ? 'Bar + Keuken' : hasBar ? 'Bar' : 'Keuken';
+    card.innerHTML=`<div class="order-head"><div><strong>Bestelling voor ${tableLabel} ${esc(first.tableNumber ?? '—')}</strong><div class="order-meta">${routeLabel} · live bijgewerkt</div></div><span class="status-pill ${orderStatusClass(overall)}"><span class="status-dot"></span>${orderStatusLabel(overall)}</span></div><div class="order-items">${itemLines.join('')}</div><div class="order-total"><span>Totaal</span><span>${euro(total)}</span></div>`;
+    w.appendChild(card);
+  }
+}
+function startPlacedOrdersListener(){
+  if(placedOrdersRef)placedOrdersRef.off();
+  if(!st.key){renderPlacedOrders([]);return}
+
+  st.activeOrderGroups=savedOrderGroups();
+  placedOrdersRef=firebase.database().ref('restaurants/'+st.key+'/orders');
+  placedOrdersRef.on('value',snap=>{
+    const all=snap.val()||{};
+    const actieveStatussen=new Set(['nieuw','bereiden','klaar','bezorgd']);
+    let filtered=Object.entries(all).filter(([,o])=>o&&actieveStatussen.has(o.status||'nieuw'));
+
+    // Toon primair de bestellingen van de gekozen tafel/bank. Dit maakt de tab ook
+    // bruikbaar voor oude orders die vóór orderGroupId zijn opgeslagen.
+    if(st.table){
+      const tableNo=String(st.table.number);
+      filtered=filtered.filter(([,o])=>String(o.tableNumber??'')===tableNo);
+    }else if(st.activeOrderGroups.length){
+      filtered=filtered.filter(([,o])=>o.orderGroupId&&st.activeOrderGroups.includes(o.orderGroupId));
+    }else{
+      filtered=[];
+    }
+
+    // Orders zonder groupId blijven zichtbaar. Nieuwe orders met een groupId worden
+    // ook lokaal onthouden zodat de klant ze na een refresh terugziet.
+    const foundGroups=filtered.map(([,o])=>o.orderGroupId).filter(Boolean);
+    st.activeOrderGroups=[...new Set([...st.activeOrderGroups,...foundGroups])].slice(-30);
+    saveOrderGroups();
+
+    renderPlacedOrders(filtered);
+    const count=filtered.length;
+    $('placedNav').dataset.count=count?String(count):'';
+    if(!count)$('placedNav').removeAttribute('data-count');
+  });
 }
 
 async function waitForFirebase(timeoutMs=8000){
@@ -433,6 +553,7 @@ async function boot(){
     const f=await findRestaurant();
     if(!f){status('Restaurant niet gevonden','Deze link lijkt niet meer geldig te zijn.','Geen restaurant gevonden voor id="'+getRestaurantId()+'" (of code="'+getCode()+'").');return}
     st.key=f.id;st.restaurant=f.data||{};$('restaurant').textContent=st.restaurant.naam||'Zelfservice';
+    st.activeOrderGroups=savedOrderGroups();
 
     const [layout,products,stock]=await Promise.all([
       loadLayout(st.key),
@@ -445,14 +566,18 @@ async function boot(){
     firebase.database().ref('restaurants/'+st.key+'/selfserviceconfig/plattegrond').on('value',s=>{if(s.val()!=null){st.layout=s.val();renderFloorplan()}});
     firebase.database().ref('restaurants/'+st.key+'/selfserviceconfig/producten').on('value',s=>{if(s.val()!=null){st.products=s.val();renderProducts()}});
     firebase.database().ref('restaurants/'+st.key+'/stock').on('value',s=>{st.stock=s.val()||{};renderProducts()});
+    startPlacedOrdersListener();
   }catch(e){console.error(e);status('Zelfservice kan niet starten','Firebase kon niet worden geladen of gelezen.',String(e?.stack||e))}
 }
 document.addEventListener('DOMContentLoaded',()=>{
   $('tablesNav').onclick=()=>{if(st.table||!$('tablesStep').hidden)show('tablesStep')};
   $('menuNav').onclick=()=>{if(st.table)show('menuStep')};
+  $('placedNav').onclick=()=>{if(st.key){startPlacedOrdersListener();show('placedStep')}};
+  $('placedQuickFromTables').onclick=()=>{if(st.key){startPlacedOrdersListener();show('placedStep')}};
+  $('placedQuickFromMenu').onclick=()=>{if(st.key){startPlacedOrdersListener();show('placedStep')}};
   $('cartOpen').onclick=openCart;$('cartClose').onclick=()=>$('cart').hidden=true;
   $('place').onclick=placeOrder;
-  $('new').onclick=()=>show('tablesStep');
+  $('new').onclick=()=>show('menuStep');
   const watchdog=setTimeout(()=>{if(!$('loading').hidden){status('Verbinden duurt te lang','De gegevens van het restaurant konden niet binnen 8 seconden worden opgehaald.','Controleer de link en Firebase Rules. Open browserconsole voor meer details.')}},8000);
   boot().finally(()=>clearTimeout(watchdog));
 });

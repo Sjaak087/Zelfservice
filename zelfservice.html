@@ -164,7 +164,9 @@ function getRestaurantId(){
 function getCode(){
   const u=new URL(location.href);
   for(const k of ['selfservicecode','selfServiceCode','selfserviceCode','code','joinCode','joincode']){
-    const v=u.searchParams.get(k); if(/^\d{5}$/.test(v||'')) return v;
+    const v=(u.searchParams.get(k)||'').trim();
+    // Ondersteunt zowel oudere numerieke codes als de huidige 6-teken restaurantcode.
+    if(/^[A-Za-z0-9]{5,10}$/.test(v)) return v.toUpperCase();
   }
   return '';
 }
@@ -494,7 +496,9 @@ function renderPlacedOrders(orders){
     });
 
     const tableLabel=first.tableKind==='bank'?'Bank':'Tafel';
-    const routeLabel=parts.length>1?'Bar + Keuken':destination;
+    const hasBar=parts.some(([,o])=>o.bestemming==='bar'||Object.values(o.itemDetails||{}).some(d=>d&&d.bestemming==='bar'));
+    const hasKitchen=parts.some(([,o])=>o.bestemming!=='bar'||Object.values(o.itemDetails||{}).some(d=>d&&d.bestemming!=='bar'));
+    const routeLabel=hasBar && hasKitchen ? 'Bar + Keuken' : hasBar ? 'Bar' : 'Keuken';
     card.innerHTML=`<div class="order-head"><div><strong>Bestelling voor ${tableLabel} ${esc(first.tableNumber ?? '—')}</strong><div class="order-meta">${routeLabel} · live bijgewerkt</div></div><span class="status-pill ${orderStatusClass(overall)}"><span class="status-dot"></span>${orderStatusLabel(overall)}</span></div><div class="order-items">${itemLines.join('')}</div><div class="order-total"><span>Totaal</span><span>${euro(total)}</span></div>`;
     w.appendChild(card);
   }
@@ -507,7 +511,8 @@ function startPlacedOrdersListener(){
   placedOrdersRef=firebase.database().ref('restaurants/'+st.key+'/orders');
   placedOrdersRef.on('value',snap=>{
     const all=snap.val()||{};
-    let filtered=Object.entries(all).filter(([,o])=>o&&o.status!=='geannuleerd');
+    const actieveStatussen=new Set(['nieuw','bereiden','klaar','bezorgd']);
+    let filtered=Object.entries(all).filter(([,o])=>o&&actieveStatussen.has(o.status||'nieuw'));
 
     // Toon primair de bestellingen van de gekozen tafel/bank. Dit maakt de tab ook
     // bruikbaar voor oude orders die vóór orderGroupId zijn opgeslagen.
