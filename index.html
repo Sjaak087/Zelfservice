@@ -153,7 +153,7 @@ const firebaseConfig={apiKey:"AIzaSyBVwx6eUdSkebGIK2J_NDwOD3rxTcIg1v4",authDomai
 const $=id=>document.getElementById(id);
 const esc=v=>{const d=document.createElement('div');d.textContent=v??'';return d.innerHTML};
 const euro=v=>'€ '+(Number(v)||0).toFixed(2).replace('.',',');
-const st={key:null,restaurant:null,layout:{},products:{},stock:{},table:null,cart:[],activeOrderGroups:[]};
+const st={key:null,restaurant:null,layout:{},products:{},stock:{},table:null,cart:[],activeOrderGroups:[],completedOrderGroups:[]};
 let placedOrdersRef=null;
 
 function getRestaurantId(){
@@ -404,6 +404,12 @@ function savedOrderGroups(){
 function saveOrderGroups(){
   localStorage.setItem('zelfserviceOrderGroups_'+st.key,JSON.stringify(st.activeOrderGroups.slice(-20)));
 }
+function savedCompletedOrderGroups(){
+  try{return JSON.parse(localStorage.getItem('zelfserviceCompletedOrderGroups_'+st.key)||'[]').filter(Boolean)}catch(e){return []}
+}
+function saveCompletedOrderGroups(){
+  localStorage.setItem('zelfserviceCompletedOrderGroups_'+st.key,JSON.stringify(st.completedOrderGroups.slice(-50)));
+}
 async function placeOrder(){
   if(!st.table||!st.cart.length)return;
   orderError('');
@@ -508,10 +514,11 @@ function startPlacedOrdersListener(){
   if(!st.key){renderPlacedOrders([]);return}
 
   st.activeOrderGroups=savedOrderGroups();
+  st.completedOrderGroups=savedCompletedOrderGroups();
   placedOrdersRef=firebase.database().ref('restaurants/'+st.key+'/orders');
   placedOrdersRef.on('value',snap=>{
     const all=snap.val()||{};
-    const actieveStatussen=new Set(['nieuw','bereiden','klaar','bezorgd']);
+    const actieveStatussen=new Set(['nieuw','bereiden','klaar']);
     let filtered=Object.entries(all).filter(([,o])=>o&&actieveStatussen.has(o.status||'nieuw'));
 
     // Toon primair de bestellingen van de gekozen tafel/bank. Dit maakt de tab ook
@@ -525,14 +532,34 @@ function startPlacedOrdersListener(){
       filtered=[];
     }
 
-    // Orders zonder groupId blijven zichtbaar. Nieuwe orders met een groupId worden
-    // ook lokaal onthouden zodat de klant ze na een refresh terugziet.
+    // Zodra een volledige ordergroep Gemaakt is, is die definitief afgerond.
+    // We onthouden dat lokaal zodat hij niet later terug kan springen naar
+    // In bereiding wanneer Firebase nog een update van een deelorder geeft.
+    const groupedAll={};
+    Object.entries(all).forEach(([id,o])=>{
+      if(!o||!actieveStatussen.has(o.status||'nieuw')||!o.orderGroupId)return;
+      if(st.table && String(o.tableNumber??'')!==String(st.table.number))return;
+      (groupedAll[o.orderGroupId]??=[]).push(o);
+    });
+    Object.entries(groupedAll).forEach(([gid,parts])=>{
+      if(parts.length && parts.every(o=>(o.status||'nieuw')==='klaar')){
+        if(!st.completedOrderGroups.includes(gid)) st.completedOrderGroups.push(gid);
+      }
+    });
+    st.completedOrderGroups=[...new Set(st.completedOrderGroups)].slice(-50);
+    saveCompletedOrderGroups();
+
+    // Gemaakte groepen worden volledig uit 'Eerder geplaatst' verwijderd.
+    // Daardoor verschijnt zo'n bestelling niet opnieuw als In bereiding.
+    filtered=filtered.filter(([,o])=>!o.orderGroupId || !st.completedOrderGroups.includes(o.orderGroupId));
+
     const foundGroups=filtered.map(([,o])=>o.orderGroupId).filter(Boolean);
     st.activeOrderGroups=[...new Set([...st.activeOrderGroups,...foundGroups])].slice(-30);
     saveOrderGroups();
 
     renderPlacedOrders(filtered);
-    const count=filtered.length;
+    const visibleGroups=new Set(filtered.map(([,o])=>o.orderGroupId||o.__id||'legacy'));
+    const count=visibleGroups.size;
     $('placedNav').dataset.count=count?String(count):'';
     if(!count)$('placedNav').removeAttribute('data-count');
   });
