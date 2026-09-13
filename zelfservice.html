@@ -311,21 +311,25 @@ function renderRowControl(bottom,p,qty){
     bottom.appendChild(wrap);
   }
 }
-function qtyOf(key){const x=st.cart.find(x=>x.productKey===key);return x?x.q:0}
+function qtyOf(key){const x=st.cart.find(x=>String(x.productKey)===String(key));return x?x.q:0}
 function addToCart(p){
-  const ex=st.cart.find(x=>x.productKey===p.originalId);
-  if(ex)ex.q++;
-  else st.cart.push({
-    productKey:p.originalId,
-    n:productLabel(p),
-    p:price(p),
-    q:1,
-    bestemming:destinationFromProduct(p,'keuken')
-  });
+  const key=String(p?.originalId ?? p?.key ?? '');
+  if(!key) { console.error('Product zonder geldige sleutel', p); return; }
+  const ex=st.cart.find(x=>String(x.productKey)===key);
+  if(ex){
+    ex.q+=1;
+  } else {
+    st.cart.push({
+      productKey:key,
+      n:productLabel(p),
+      p:price(p),
+      q:1
+    });
+  }
   updateCart();
 }
 function decFromCart(key){
-  const i=st.cart.findIndex(x=>x.productKey===key);
+  const i=st.cart.findIndex(x=>String(x.productKey)===String(key));
   if(i<0)return 0;
   st.cart[i].q--;
   const q=st.cart[i].q;
@@ -333,21 +337,14 @@ function decFromCart(key){
   updateCart();return q;
 }
 function updateCart(){
-  const n=st.cart.reduce((s,x)=>s+x.q,0);
-  const t=st.cart.reduce((s,x)=>s+x.p*x.q,0);
-  const routes={};
-  st.cart.forEach(x=>{const d=x.bestemming||'keuken';routes[d]=(routes[d]||0)+x.q});
-  $('count').textContent=n;
-  $('total').textContent=euro(t);
-  const routeLabel=$('routeLabel');
-  const routeSummary=$('routeSummary');
-  if(routeLabel){
-    routeLabel.textContent=n?(Object.keys(routes).length>1?'naar bar + keuken':'naar '+(Object.keys(routes)[0]==='bar'?'de bar':'de keuken')):'klaar om te versturen';
-  }
-  if(routeSummary){
-    routeSummary.innerHTML=Object.entries(routes).map(([d,q])=>`<span class="route-chip ${d==='bar'?'bar':''}">${d==='bar'?'Bar':'Keuken'} · ${q}</span>`).join('');
-  }
-  $('cartBar').hidden=!n;
+  const n=st.cart.reduce((sum,x)=>sum+(Number(x.q)||0),0);
+  const t=st.cart.reduce((sum,x)=>sum+(Number(x.p)||0)*(Number(x.q)||0),0);
+  const countEl=$('count');
+  const totalEl=$('total');
+  const barEl=$('cartBar');
+  if(countEl) countEl.textContent=String(n);
+  if(totalEl) totalEl.textContent=euro(t);
+  if(barEl) barEl.hidden=n===0;
 }
 function openCart(){
   const w=$('cartItems');w.innerHTML='';
