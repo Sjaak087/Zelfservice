@@ -9,19 +9,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#101114;
-  --ink-soft:#5b606b;
-  --paper:#f7f7f4;
-  --panel:#ffffff;
-  --panel-2:#f0f1ec;
-  --line:#dedfd8;
-  --accent:#1b6ef3;
-  --accent-2:#0d4fc4;
-  --bar:#b13a47;
-  --bar-soft:#fff0f2;
-  --kitchen:#1d7b57;
-  --kitchen-soft:#edf9f3;
-  --shadow:0 18px 55px rgba(16,17,20,.08);
+  --ink:#f8f1e5;
+  --ink-soft:#b6aa98;
+  --paper:#120f0c;
+  --panel:#1a1511;
+  --panel-2:#241c16;
+  --line:#3a2d22;
+  --accent:#d8a64a;
+  --accent-2:#b9852e;
+  --bar:#e27788;
+  --bar-soft:#351d24;
+  --kitchen:#75c89e;
+  --kitchen-soft:#1b3027;
+  --shadow:0 20px 60px rgba(0,0,0,.38);
   --radius-xl:28px;
   --radius-lg:20px;
   --radius-md:14px;
@@ -30,23 +30,23 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:linear-gradient(180deg,#eef0ea 0,#f7f7f4 38%,#f7f7f4 100%);color:var(--ink);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased}
-button{font:inherit}button:focus-visible{outline:3px solid rgba(27,110,243,.25);outline-offset:3px}
+body{margin:0;background:radial-gradient(circle at top left,rgba(138,85,33,.16),transparent 34%),radial-gradient(circle at 85% 10%,rgba(92,35,28,.16),transparent 28%),linear-gradient(180deg,#100d0a 0,#17110d 45%,#0e0b09 100%);color:var(--ink);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased}
+button{font:inherit}button:focus-visible{outline:3px solid rgba(216,166,74,.32);outline-offset:3px}
 .wrap{width:min(1100px,100%);margin:0 auto;min-height:100vh;position:relative}
-header{position:sticky;top:0;z-index:20;background:rgba(247,247,244,.9);backdrop-filter:blur(16px);border-bottom:1px solid rgba(222,223,216,.92)}
+header{position:sticky;top:0;z-index:20;background:rgba(18,15,12,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(88,66,48,.72)}
 .headrow{padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}
-.brand{display:flex;align-items:center;gap:14px;min-width:0}.logo{width:46px;height:46px;border-radius:15px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px;box-shadow:0 8px 24px rgba(16,17,20,.18)}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}.logo{width:46px;height:46px;border-radius:15px;background:linear-gradient(145deg,#34251b,#17110d);color:var(--accent);display:grid;place-items:center;font-weight:800;font-size:17px;box-shadow:0 8px 24px rgba(16,17,20,.18)}
 .restaurant{font-size:18px;font-weight:800;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.subtle{font-size:12px;color:var(--ink-soft);margin-top:3px}
-nav{display:flex;gap:8px}nav button{border:1px solid transparent;background:transparent;color:var(--ink-soft);padding:9px 13px;border-radius:999px;cursor:pointer;font-size:13px;font-weight:700}nav button:hover{background:#fff;border-color:var(--line);color:var(--ink)}nav button.active{background:var(--ink);color:#fff}
-main{padding:34px 24px 140px}.hero{display:flex;flex-direction:column;gap:6px;margin-bottom:24px}h1{font-size:clamp(30px,4vw,46px);line-height:1.02;letter-spacing:-.045em;margin:0;font-weight:850}p{color:var(--ink-soft);line-height:1.65;margin:0;max-width:62ch}.chosen-row{display:flex;align-items:center;gap:9px;margin-top:10px;color:var(--ink-soft)}.chosen-row .val{background:var(--ink);color:#fff;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800}
-.center{padding:92px 18px;text-align:center}.loadingmark{width:48px;height:48px;border:4px solid #dfe1da;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 22px}@keyframes spin{to{transform:rotate(360deg)}}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px}.tableplaque{border:1px solid var(--line);background:var(--panel);border-radius:18px;padding:18px;min-height:118px;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 7px 22px rgba(16,17,20,.04);transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}.tableplaque:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#c9cbd1}.tableplaque .num{font-size:32px;font-weight:850;letter-spacing:-.04em}.tableplaque .kind{font-size:12px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.08em}.floor-note{font-size:12px;color:var(--ink-soft);margin:-6px 0 18px}
-.category{font-size:12px;text-transform:uppercase;letter-spacing:.13em;color:var(--ink-soft);margin:28px 0 10px;font-weight:850;display:flex;align-items:center;gap:10px}.category:first-child{margin-top:0}.category:after{content:"";height:1px;background:var(--line);flex:1}.category .dot{display:none}
-.product-row{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px 17px;margin:10px 0;box-shadow:0 6px 18px rgba(16,17,20,.035);transition:transform .15s ease,box-shadow .15s ease}.product-row:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(16,17,20,.07)}.product-row.out{opacity:.55}.product-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}.product-name{font-size:16px;font-weight:800;letter-spacing:-.01em}.product-price{font-size:14px;font-weight:850;white-space:nowrap}.product-desc{font-size:12px;color:var(--ink-soft);margin-top:6px;line-height:1.5}.destination{display:inline-flex;align-items:center;gap:7px;margin-top:11px;padding:5px 9px;border-radius:999px;background:var(--kitchen-soft);color:var(--kitchen);font-size:10.5px;font-weight:850;letter-spacing:.06em;text-transform:uppercase;border:1px solid #d7efe3}.destination.bar{background:var(--bar-soft);color:var(--bar);border-color:#f1d1d6}.destination-dot{width:7px;height:7px;border-radius:50%;background:var(--kitchen)}.destination.bar .destination-dot{background:var(--bar)}.product-bottom{display:flex;justify-content:flex-end;margin-top:12px}
-.addbtn{border:0;background:var(--ink);color:#fff;padding:9px 14px;border-radius:11px;cursor:pointer;font-size:12px;font-weight:800}.addbtn:hover{background:#26282d}.stepper{display:flex;align-items:center;gap:4px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:4px}.stepper button{width:30px;height:30px;border:0;background:#fff;border-radius:9px;color:var(--ink);font-weight:850;cursor:pointer}.stepper button:hover{background:#e7e8e3}.stepper .qty{min-width:30px;text-align:center;font-weight:850;font-size:13px}
-.bar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:30;width:min(940px,calc(100% - 26px));display:flex;align-items:center;justify-content:space-between;gap:16px;background:rgba(16,17,20,.96);color:#fff;border-radius:18px;padding:13px 14px 13px 17px;box-shadow:0 18px 45px rgba(16,17,20,.28)}.cartinfo{display:flex;flex-direction:column;gap:2px;min-width:0}.cartinfo strong{font-size:13px}.cartinfo span{color:#bfc3cb;font-size:11.5px}.route-summary{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.route-chip{font-size:10px;font-weight:800;color:#dce0e7;border:1px solid #3b3f47;padding:4px 7px;border-radius:999px}.route-chip.bar{color:#ffb9c2;border-color:#77424a}.btn{border:0;border-radius:12px;background:var(--accent);color:#fff;padding:11px 17px;font-size:13px;font-weight:850;cursor:pointer;box-shadow:0 9px 22px rgba(27,110,243,.2)}.btn:hover{background:var(--accent-2)}.btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:none}.btn.secondary:hover{background:#f0f1ec}.btn:disabled{opacity:.6;cursor:default}
-.modal{position:fixed;inset:0;z-index:50;background:rgba(16,17,20,.48);display:flex;align-items:flex-end;justify-content:center;padding:0 12px}.panel{width:min(680px,100%);max-height:84vh;overflow:auto;background:#fff;border:1px solid var(--line);border-bottom:0;border-radius:24px 24px 0 0;padding:22px 22px 26px;box-shadow:0 -20px 60px rgba(16,17,20,.22)}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.panel h2{margin:0;font-size:23px;letter-spacing:-.03em}.closex{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:18px}.closex:hover{background:var(--panel-2)}.cartrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.cartrow .left{display:flex;flex-direction:column;gap:4px}.cartrow .left strong{font-size:14px}.qtypill{font-size:11px;color:var(--ink-soft)}.minus{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}.minus:hover{background:var(--panel-2)}.cart-total{display:flex;justify-content:space-between;align-items:center;padding:18px 0 4px;font-weight:850}.cart-total .amount{font-size:18px}.order-error{margin-top:14px;padding:12px 13px;border:1px solid #f0c5cb;background:#fff0f2;color:#9b3542;border-radius:10px;font-size:12px;line-height:1.55}.success{display:inline-grid;place-items:center;width:72px;height:72px;border-radius:22px;background:#eaf8f1;color:var(--kitchen);font-size:30px;font-weight:900;margin-bottom:18px}.empty{padding:22px;border:1px dashed #c9cbd1;border-radius:16px;color:var(--ink-soft);background:#fff;font-size:13px;line-height:1.6}.debug{white-space:pre-wrap;text-align:left;max-width:700px;margin:18px auto 0;padding:14px;background:#fff;border:1px solid var(--line);color:var(--ink-soft);border-radius:12px;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto}
-[hidden]{display:none!important}@media(max-width:640px){.headrow{padding:15px 15px}.restaurant{font-size:16px}main{padding:25px 15px 132px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.bar{bottom:10px;width:calc(100% - 16px)}.bar .btn{padding-inline:13px}.center{padding:65px 14px}.product-row{padding:14px}.panel{padding:19px 16px 22px}}
+nav{display:flex;gap:8px}nav button{border:1px solid transparent;background:transparent;color:var(--ink-soft);padding:9px 13px;border-radius:999px;cursor:pointer;font-size:13px;font-weight:700}nav button:hover{background:#251b14;border-color:var(--line);color:var(--ink)}nav button.active{background:linear-gradient(135deg,#d8a64a,#a86f22);color:#1a120b}
+main{padding:34px 24px 140px}.hero{display:flex;flex-direction:column;gap:6px;margin-bottom:24px}h1{font-size:clamp(30px,4vw,46px);line-height:1.02;letter-spacing:-.045em;margin:0;font-weight:850}p{color:var(--ink-soft);line-height:1.65;margin:0;max-width:62ch}.chosen-row{display:flex;align-items:center;gap:9px;margin-top:10px;color:var(--ink-soft)}.chosen-row .val{background:#2a1d14;color:#f8f1e5;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800}
+.center{padding:92px 18px;text-align:center}.loadingmark{width:48px;height:48px;border:4px solid #342820;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 22px}@keyframes spin{to{transform:rotate(360deg)}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px}.tableplaque{border:1px solid var(--line);background:linear-gradient(180deg,#211913,#17120e);border-radius:18px;padding:18px;min-height:118px;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 12px 30px rgba(0,0,0,.2);transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}.tableplaque:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#6a4b2e}.tableplaque .num{font-size:32px;font-weight:850;letter-spacing:-.04em}.tableplaque .kind{font-size:12px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.08em}.floor-note{font-size:12px;color:var(--ink-soft);margin:-6px 0 18px}
+.category{font-size:12px;text-transform:uppercase;letter-spacing:.13em;color:var(--ink-soft);margin:28px 0 10px;font-weight:850;display:flex;align-items:center;gap:10px}.category:first-child{margin-top:0}.category:after{content:"";height:1px;background:linear-gradient(90deg,var(--line),transparent);flex:1}.category .dot{display:none}
+.product-row{background:linear-gradient(180deg,#201812,#17120f);border:1px solid var(--line);border-radius:18px;padding:16px 17px;margin:10px 0;box-shadow:0 6px 18px rgba(16,17,20,.035);transition:transform .15s ease,box-shadow .15s ease}.product-row:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(16,17,20,.07)}.product-row.out{opacity:.55}.product-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}.product-name{font-size:16px;font-weight:800;letter-spacing:-.01em}.product-price{font-size:14px;font-weight:850;white-space:nowrap}.product-desc{font-size:12px;color:var(--ink-soft);margin-top:6px;line-height:1.5}.destination{display:inline-flex;align-items:center;gap:7px;margin-top:11px;padding:5px 9px;border-radius:999px;background:var(--kitchen-soft);color:var(--kitchen);font-size:10.5px;font-weight:850;letter-spacing:.06em;text-transform:uppercase;border:1px solid #d7efe3}.destination.bar{background:var(--bar-soft);color:var(--bar);border-color:#f1d1d6}.destination-dot{width:7px;height:7px;border-radius:50%;background:var(--kitchen)}.destination.bar .destination-dot{background:var(--bar)}.product-bottom{display:flex;justify-content:flex-end;margin-top:12px}
+.addbtn{border:1px solid #6a4a27;background:linear-gradient(135deg,#d8a64a,#a9732c);color:#20150c;padding:9px 14px;border-radius:11px;cursor:pointer;font-size:12px;font-weight:800}.addbtn:hover{background:#26282d}.stepper{display:flex;align-items:center;gap:4px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:4px}.stepper button{width:30px;height:30px;border:1px solid #4a392c;background:#261c15;border-radius:9px;color:var(--ink);font-weight:850;cursor:pointer}.stepper button:hover{background:#34261b}.stepper .qty{min-width:30px;text-align:center;font-weight:850;font-size:13px}
+.cart-bar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:30;width:min(940px,calc(100% - 26px));display:flex;align-items:center;justify-content:space-between;gap:16px;background:rgba(22,16,12,.96);color:#f8f1e5;border:1px solid #493628;border-radius:18px;padding:13px 14px 13px 17px;box-shadow:0 18px 45px rgba(16,17,20,.28)}.cartinfo{display:flex;flex-direction:column;gap:2px;min-width:0}.cartinfo strong{font-size:13px}.cartinfo span{color:#b8aa98;font-size:11.5px}.route-summary{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.route-chip{font-size:10px;font-weight:800;color:#eadfcf;border:1px solid #3b3f47;padding:4px 7px;border-radius:999px}.route-chip.bar{color:#ffb9c2;border-color:#77424a}.btn{border:1px solid #7c5b2e;border-radius:12px;background:linear-gradient(135deg,#d8a64a,#aa742e);color:#1b120b;padding:11px 17px;font-size:13px;font-weight:850;cursor:pointer;box-shadow:0 9px 22px rgba(27,110,243,.2)}.btn:hover{background:linear-gradient(135deg,#e2b55b,#bc8735)}.btn.secondary{background:#241b15;color:var(--ink);border:1px solid var(--line);box-shadow:none}.btn.secondary:hover{background:#30231a}.btn:disabled{opacity:.6;cursor:default}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.68);display:flex;align-items:flex-end;justify-content:center;padding:0 12px}.panel{width:min(680px,100%);max-height:84vh;overflow:auto;background:linear-gradient(180deg,#211913,#17110d);border:1px solid var(--line);border-bottom:0;border-radius:24px 24px 0 0;padding:22px 22px 26px;box-shadow:0 -20px 60px rgba(16,17,20,.22)}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.panel h2{margin:0;font-size:23px;letter-spacing:-.03em}.closex{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:#261c15;cursor:pointer;font-size:18px}.closex:hover{background:var(--panel-2)}.cartrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.cartrow .left{display:flex;flex-direction:column;gap:4px}.cartrow .left strong{font-size:14px}.qtypill{font-size:11px;color:var(--ink-soft)}.minus{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#261c15;cursor:pointer}.minus:hover{background:var(--panel-2)}.cart-total{display:flex;justify-content:space-between;align-items:center;padding:18px 0 4px;font-weight:850}.cart-total .amount{font-size:18px}.order-error{margin-top:14px;padding:12px 13px;border:1px solid #f0c5cb;background:#fff0f2;color:#9b3542;border-radius:10px;font-size:12px;line-height:1.55}.success{display:inline-grid;place-items:center;width:72px;height:72px;border-radius:22px;background:#eaf8f1;color:var(--kitchen);font-size:30px;font-weight:900;margin-bottom:18px}.empty{padding:22px;border:1px dashed #5a4636;border-radius:16px;color:var(--ink-soft);background:#1b1511;font-size:13px;line-height:1.6}.debug{white-space:pre-wrap;text-align:left;max-width:700px;margin:18px auto 0;padding:14px;background:#17110d;border:1px solid var(--line);color:var(--ink-soft);border-radius:12px;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto}
+[hidden]{display:none!important}@media(max-width:640px){.headrow{padding:15px 15px}.restaurant{font-size:16px}main{padding:25px 15px 132px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.cart-bar{bottom:10px;width:calc(100% - 16px)}.cart-bar .btn{padding-inline:13px}.center{padding:65px 14px}.product-row{padding:14px}.panel{padding:19px 16px 22px}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
@@ -109,7 +109,7 @@ main{padding:34px 24px 140px}.hero{display:flex;flex-direction:column;gap:6px;ma
   </main>
 </div>
 
-<div class="bar" id="cartBar" hidden>
+<div class="cart-bar" id="cartBar" hidden>
   <div class="cartinfo">
     <strong><b id="count">0</b> items in je bestelling</strong>
     <span>Subtotaal <b id="total">€ 0,00</b></span>
@@ -202,10 +202,15 @@ async function loadProducts(id){
     readAny('restaurants/'+id+'/categories')
   ]);
   const out={};
-  const keys=new Set([...Object.keys(products||{}),...Object.keys(mirror||{})]);
+  // products/{productId} is de bron voor routing. De selfservice-spiegel kan
+  // gesaniteerde sleutels gebruiken en bevat daarom originalId.
+  const mirrorById={};
+  Object.values(mirror||{}).forEach(view=>{ if(view && view.originalId) mirrorById[view.originalId]=view; });
+  const keys=new Set(Object.keys(products||{}));
+  Object.keys(mirrorById).forEach(k=>keys.add(k));
   for(const key of keys){
     const base=(products&&products[key])||{};
-    const view=(mirror&&mirror[key])||{};
+    const view=mirrorById[key]||{};
     if(!base.label && !view.label) continue;
     const catId=base.categorie??view.categorie;
     const catNaam=(catId&&categories&&categories[catId])?categories[catId].naam:(view.categorie||'Overig');
@@ -363,32 +368,43 @@ async function placeOrder(){
   orderError('');
   const place=$('place'); place.disabled=true; place.textContent='Routing controleren…';
   try{
-    // Nog één keer live de productbestemming uit Firebase ophalen, zodat een wijziging
-    // in het beheerpaneel direct wordt gevolgd en niet per ongeluk naar de verkeerde post gaat.
-    await refreshCartDestinations();
-    const items={};
-    const regels=[];
-    const bestemmingen={};
+    // Altijd opnieuw uit dit specifieke restaurant lezen. De instelling op
+    // products/<productId>/bestemming is leidend; een oude selfservice-cache
+    // mag nooit bepalen waar een product terechtkomt.
+    const liveProducts=await readAny('restaurants/'+st.key+'/products');
+    const groups={keuken:{items:{},regels:[]},bar:{items:{},regels:[]}};
     for(const x of st.cart){
-      const bestemming=destinationFromProduct({bestemming:x.bestemming},'keuken');
-      items[x.productKey]=(items[x.productKey]||0)+x.q;
-      regels.push({productKey:x.productKey,aantal:x.q,bestemming,product:x.n});
-      if(!bestemmingen[bestemming]) bestemmingen[bestemming]={aantal:0,items:{}};
-      bestemmingen[bestemming].aantal+=x.q;
-      bestemmingen[bestemming].items[x.productKey]=(bestemmingen[bestemming].items[x.productKey]||0)+x.q;
+      const live=liveProducts&&liveProducts[x.productKey];
+      const fallback=st.products[x.productKey]||x;
+      const bestemming=destinationFromProduct(live,destinationFromProduct(fallback,'keuken'))==='bar'?'bar':'keuken';
+      if(!groups[bestemming].items[x.productKey]) groups[bestemming].items[x.productKey]=0;
+      groups[bestemming].items[x.productKey]+=x.q;
+      groups[bestemming].regels.push({productKey:x.productKey,aantal:x.q,bestemming,product:x.n});
     }
-    const order={
-      tableNumber:st.table.number,
-      tableKind:st.table.kind,
-      items,
-      regels,
-      bestemmingen,
-      status:'nieuw',
-      tijd:firebase.database.ServerValue.TIMESTAMP
-    };
-    await firebase.database().ref('restaurants/'+st.key+'/orders').push(order);
+
+    const groupEntries=Object.entries(groups).filter(([,g])=>Object.keys(g.items).length>0);
+    const orderGroupId=groupEntries.length>1
+      ? firebase.database().ref('restaurants/'+st.key+'/orders').push().key
+      : null;
+    const basePush=st.table.kind==='bank'?'bank':'tafel';
+    for(const [bestemming,g] of groupEntries){
+      const id=firebase.database().ref('restaurants/'+st.key+'/orders').push().key;
+      const order={
+        tableNumber:st.table.number,
+        tableKind:basePush,
+        items:g.items,
+        regels:g.regels,
+        bestemming,
+        status:'nieuw',
+        tijd:firebase.database.ServerValue.TIMESTAMP
+      };
+      if(orderGroupId) order.orderGroupId=orderGroupId;
+      await firebase.database().ref('restaurants/'+st.key+'/orders/'+id).set(order);
+    }
+
     st.cart=[]; updateCart(); $('cart').hidden=true;
-    $('doneText').textContent='Bestelling verstuurd voor '+(st.table.kind==='bank'?'Bank ':'Tafel ')+st.table.number+'. De ingestelde post per product is meegestuurd.';
+    const sent=groupEntries.map(([d,g])=>`${g.regels.reduce((n,r)=>n+r.aantal,0)} naar ${d==='bar'?'de bar':'de keuken'}`).join(' en ');
+    $('doneText').textContent='Bestelling voor '+(st.table.kind==='bank'?'Bank ':'Tafel ')+st.table.number+' verstuurd: '+sent+'.';
     show('doneStep');
   }catch(e){
     console.error('Bestelling plaatsen mislukt:',e);
