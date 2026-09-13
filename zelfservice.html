@@ -44,7 +44,7 @@ main{padding:34px 24px 140px}.hero{display:flex;flex-direction:column;gap:6px;ma
 .category{font-size:12px;text-transform:uppercase;letter-spacing:.13em;color:var(--ink-soft);margin:28px 0 10px;font-weight:850;display:flex;align-items:center;gap:10px}.category:first-child{margin-top:0}.category:after{content:"";height:1px;background:linear-gradient(90deg,var(--line),transparent);flex:1}.category .dot{display:none}
 .product-row{background:linear-gradient(180deg,#201812,#17120f);border:1px solid var(--line);border-radius:18px;padding:16px 17px;margin:10px 0;box-shadow:0 6px 18px rgba(16,17,20,.035);transition:transform .15s ease,box-shadow .15s ease}.product-row:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(16,17,20,.07)}.product-row.out{opacity:.55}.product-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}.product-name{font-size:16px;font-weight:800;letter-spacing:-.01em}.product-price{font-size:14px;font-weight:850;white-space:nowrap}.product-desc{font-size:12px;color:var(--ink-soft);margin-top:6px;line-height:1.5}.destination{display:inline-flex;align-items:center;gap:7px;margin-top:11px;padding:5px 9px;border-radius:999px;background:var(--kitchen-soft);color:var(--kitchen);font-size:10.5px;font-weight:850;letter-spacing:.06em;text-transform:uppercase;border:1px solid #d7efe3}.destination.bar{background:var(--bar-soft);color:var(--bar);border-color:#f1d1d6}.destination-dot{width:7px;height:7px;border-radius:50%;background:var(--kitchen)}.destination.bar .destination-dot{background:var(--bar)}.product-bottom{display:flex;justify-content:flex-end;margin-top:12px}
 .addbtn{border:1px solid #6a4a27;background:linear-gradient(135deg,#d8a64a,#a9732c);color:#20150c;padding:9px 14px;border-radius:11px;cursor:pointer;font-size:12px;font-weight:800}.addbtn:hover{background:#26282d}.stepper{display:flex;align-items:center;gap:4px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:4px}.stepper button{width:30px;height:30px;border:1px solid #4a392c;background:#261c15;border-radius:9px;color:var(--ink);font-weight:850;cursor:pointer}.stepper button:hover{background:#34261b}.stepper .qty{min-width:30px;text-align:center;font-weight:850;font-size:13px}
-.cart-bar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:30;width:min(940px,calc(100% - 26px));display:flex;align-items:center;justify-content:space-between;gap:16px;background:rgba(22,16,12,.96);color:#f8f1e5;border:1px solid #493628;border-radius:18px;padding:13px 14px 13px 17px;box-shadow:0 18px 45px rgba(16,17,20,.28)}.cartinfo{display:flex;flex-direction:column;gap:2px;min-width:0}.cartinfo strong{font-size:13px}.cartinfo span{color:#b8aa98;font-size:11.5px}.route-summary{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.route-chip{font-size:10px;font-weight:800;color:#eadfcf;border:1px solid #3b3f47;padding:4px 7px;border-radius:999px}.route-chip.bar{color:#ffb9c2;border-color:#77424a}.btn{border:1px solid #7c5b2e;border-radius:12px;background:linear-gradient(135deg,#d8a64a,#aa742e);color:#1b120b;padding:11px 17px;font-size:13px;font-weight:850;cursor:pointer;box-shadow:0 9px 22px rgba(27,110,243,.2)}.btn:hover{background:linear-gradient(135deg,#e2b55b,#bc8735)}.btn.secondary{background:#241b15;color:var(--ink);border:1px solid var(--line);box-shadow:none}.btn.secondary:hover{background:#30231a}.btn:disabled{opacity:.6;cursor:default}
+.option-hint{font-size:11px;color:var(--ink-soft);margin-top:10px}.option-list{display:grid;gap:9px;margin-top:16px}.option-chip{width:100%;text-align:left;border:1px solid var(--line);background:#241b15;color:var(--ink);border-radius:13px;padding:12px 13px;cursor:pointer;display:flex;align-items:center;gap:9px;transition:.15s ease}.option-chip:hover{background:#30231a;border-color:#6a4b2e}.option-chip.active{border-color:#c89139;background:linear-gradient(180deg,#392b1d,#2a1e14)}.option-chip.out{opacity:.48;cursor:not-allowed}.option-check{width:23px;height:23px;border-radius:8px;border:1px solid #5a4636;display:grid;place-items:center;flex:0 0 auto;font-size:13px}.option-chip.active .option-check{background:#d8a64a;color:#20150c;border-color:#d8a64a}.cart-options{display:grid;gap:3px;margin-top:3px}.cart-option-line{font-size:11px;color:#d7c7b0}.order-item-options{margin-top:5px;font-size:11px;color:#d7c7b0;line-height:1.5}.cart-bar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:30;width:min(940px,calc(100% - 26px));display:flex;align-items:center;justify-content:space-between;gap:16px;background:rgba(22,16,12,.96);color:#f8f1e5;border:1px solid #493628;border-radius:18px;padding:13px 14px 13px 17px;box-shadow:0 18px 45px rgba(16,17,20,.28)}.cartinfo{display:flex;flex-direction:column;gap:2px;min-width:0}.cartinfo strong{font-size:13px}.cartinfo span{color:#b8aa98;font-size:11.5px}.route-summary{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.route-chip{font-size:10px;font-weight:800;color:#eadfcf;border:1px solid #3b3f47;padding:4px 7px;border-radius:999px}.route-chip.bar{color:#ffb9c2;border-color:#77424a}.btn{border:1px solid #7c5b2e;border-radius:12px;background:linear-gradient(135deg,#d8a64a,#aa742e);color:#1b120b;padding:11px 17px;font-size:13px;font-weight:850;cursor:pointer;box-shadow:0 9px 22px rgba(27,110,243,.2)}.btn:hover{background:linear-gradient(135deg,#e2b55b,#bc8735)}.btn.secondary{background:#241b15;color:var(--ink);border:1px solid var(--line);box-shadow:none}.btn.secondary:hover{background:#30231a}.btn:disabled{opacity:.6;cursor:default}
 .modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.68);display:flex;align-items:flex-end;justify-content:center;padding:0 12px}.panel{width:min(680px,100%);max-height:84vh;overflow:auto;background:linear-gradient(180deg,#211913,#17110d);border:1px solid var(--line);border-bottom:0;border-radius:24px 24px 0 0;padding:22px 22px 26px;box-shadow:0 -20px 60px rgba(16,17,20,.22)}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.panel h2{margin:0;font-size:23px;letter-spacing:-.03em}.closex{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:#261c15;cursor:pointer;font-size:18px}.closex:hover{background:var(--panel-2)}.cartrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.cartrow .left{display:flex;flex-direction:column;gap:4px}.cartrow .left strong{font-size:14px}.qtypill{font-size:11px;color:var(--ink-soft)}.minus{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#261c15;cursor:pointer}.minus:hover{background:var(--panel-2)}.cart-total{display:flex;justify-content:space-between;align-items:center;padding:18px 0 4px;font-weight:850}.cart-total .amount{font-size:18px}.order-error{margin-top:14px;padding:12px 13px;border:1px solid #f0c5cb;background:#fff0f2;color:#9b3542;border-radius:10px;font-size:12px;line-height:1.55}.success{display:inline-grid;place-items:center;width:72px;height:72px;border-radius:22px;background:#eaf8f1;color:var(--kitchen);font-size:30px;font-weight:900;margin-bottom:18px}.empty{padding:22px;border:1px dashed #5a4636;border-radius:16px;color:var(--ink-soft);background:#1b1511;font-size:13px;line-height:1.6}.debug{white-space:pre-wrap;text-align:left;max-width:700px;margin:18px auto 0;padding:14px;background:#17110d;border:1px solid var(--line);color:var(--ink-soft);border-radius:12px;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto}
 [hidden]{display:none!important}@media(max-width:640px){.headrow{padding:15px 15px}.restaurant{font-size:16px}main{padding:25px 15px 132px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.cart-bar{bottom:10px;width:calc(100% - 16px)}.cart-bar .btn{padding-inline:13px}.center{padding:65px 14px}.product-row{padding:14px}.panel{padding:19px 16px 22px}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
@@ -133,6 +133,8 @@ main{padding:34px 24px 140px}.hero{display:flex;flex-direction:column;gap:6px;ma
   <button class="btn" id="cartOpen" type="button">Bekijk bestelling</button>
 </div>
 
+<div class="modal" id="productOptions" hidden><div class="panel"><div class="panel-head"><div><h2 id="productOptionsTitle">Product opties</h2><div class="option-hint" id="productOptionsHint">Kies de gewenste opties.</div></div><button class="closex" id="productOptionsClose" aria-label="Sluiten" type="button">×</button></div><div id="productOptionsList" class="option-list"></div><div style="display:flex;gap:10px;margin-top:18px"><button class="btn secondary" id="productOptionsCancel" type="button" style="flex:1">Annuleren</button><button class="btn" id="productOptionsConfirm" type="button" style="flex:1">Toevoegen</button></div></div></div>
+
 <div class="modal" id="cart" hidden>
   <div class="panel">
     <div class="panel-head">
@@ -153,7 +155,8 @@ const firebaseConfig={apiKey:"AIzaSyBVwx6eUdSkebGIK2J_NDwOD3rxTcIg1v4",authDomai
 const $=id=>document.getElementById(id);
 const esc=v=>{const d=document.createElement('div');d.textContent=v??'';return d.innerHTML};
 const euro=v=>'€ '+(Number(v)||0).toFixed(2).replace('.',',');
-const st={key:null,restaurant:null,layout:{},products:{},stock:{},table:null,cart:[],activeOrderGroups:[],completedOrderGroups:[]};
+const st={key:null,restaurant:null,layout:{},products:{},stock:{},stockOpties:{},table:null,cart:[],activeOrderGroups:[],completedOrderGroups:[]};
+const optionModalState={product:null,selected:[]};
 let placedOrdersRef=null;
 
 function getRestaurantId(){
@@ -274,6 +277,10 @@ async function loadLayout(id){
 function productLabel(p){return p.label||'Product'}
 function price(p){return Number(p.price)||0}
 function isOutOfStock(p){return !!st.stock[p.originalId]}
+function normaliseProductOptions(list){return Array.isArray(list)?list.map(o=>typeof o==='string'?{label:o,emoji:''}:{label:String(o?.label??'').trim(),emoji:o?.emoji||''}).filter(o=>o.label):[]}
+function productOptions(p){return normaliseProductOptions(p?.opties||[])}
+function isOptionOutOfStock(label){return !!st.stockOpties[String(label||'').toLowerCase()]}
+function optionText(label,p){const f=productOptions(p).find(o=>o.label.toLowerCase()===String(label).toLowerCase());return f?((f.emoji?f.emoji+' ':'')+f.label):String(label)}
 
 function renderFloorplan(){
   const g=$('tables'); g.innerHTML='';
@@ -319,45 +326,18 @@ function renderProducts(){
   }
 }
 function renderRowControl(bottom,p,qty){
-  bottom.innerHTML='';
-  if(!qty){
-    const btn=document.createElement('button');btn.className='addbtn';btn.type='button';btn.textContent='Toevoegen';
-    btn.onclick=()=>{addToCart(p);renderRowControl(bottom,p,1)};
-    bottom.appendChild(btn);
-  }else{
-    const wrap=document.createElement('div');wrap.className='stepper';
-    wrap.innerHTML=`<button type="button" aria-label="Minder">−</button><span class="qty">${qty}</span><button type="button" aria-label="Meer">+</button>`;
-    const [minus,,plus]=wrap.children;
-    minus.onclick=()=>{const q=decFromCart(p.originalId);renderRowControl(bottom,p,q)};
-    plus.onclick=()=>{addToCart(p);renderRowControl(bottom,p,qtyOf(p.originalId))};
-    bottom.appendChild(wrap);
-  }
-}
+  bottom.innerHTML='';if(!qty){const btn=document.createElement('button');btn.className='addbtn';btn.type='button';btn.textContent='Toevoegen';btn.onclick=()=>requestAddToCart(p);bottom.appendChild(btn)}else{const wrap=document.createElement('div');wrap.className='stepper';wrap.innerHTML=`<button type="button" aria-label="Minder">−</button><span class="qty">${qty}</span><button type="button" aria-label="Meer">+</button>`;const [minus,,plus]=wrap.children;minus.onclick=()=>{const q=decFromCart(p.originalId);renderRowControl(bottom,p,q)};plus.onclick=()=>requestAddToCart(p);bottom.appendChild(wrap)}}
 function qtyOf(key){const x=st.cart.find(x=>String(x.productKey)===String(key));return x?x.q:0}
-function addToCart(p){
-  const key=String(p?.originalId ?? p?.key ?? '');
-  if(!key) { console.error('Product zonder geldige sleutel', p); return; }
-  const ex=st.cart.find(x=>String(x.productKey)===key);
-  if(ex){
-    ex.q+=1;
-  } else {
-    st.cart.push({
-      productKey:key,
-      n:productLabel(p),
-      p:price(p),
-      q:1
-    });
-  }
-  updateCart();
+function requestAddToCart(p){if(productOptions(p).length)return openProductOptions(p);addToCart(p,[])}
+function addToCart(p,selectedOptions){const key=String(p?.originalId??p?.key??'');if(!key)return;const ex=st.cart.find(x=>String(x.productKey)===key);const opts=Array.isArray(selectedOptions)?selectedOptions.slice():[];if(ex){ex.q++;if(!Array.isArray(ex.opties))ex.opties=[];ex.opties.push(opts)}else st.cart.push({productKey:key,n:productLabel(p),p:price(p),q:1,opties:[opts]});updateCart();renderProducts()}
+function renderProductOptions(){
+  const p=optionModalState.product;if(!p)return;
+  const w=$('productOptionsList');w.innerHTML='';
+  productOptions(p).forEach(opt=>{const b=document.createElement('button');b.type='button';const out=isOptionOutOfStock(opt.label),active=optionModalState.selected.includes(opt.label);b.className='option-chip'+(active?' active':'')+(out?' out':'');b.innerHTML=`<span class="option-check">${active?'✓':''}</span><span>${esc(opt.emoji?opt.emoji+' '+opt.label:opt.label)}</span>${out?'<span style="margin-left:auto;font-size:10px">uitverkocht</span>':''}`;if(!out)b.onclick=()=>{const i=optionModalState.selected.indexOf(opt.label);if(i<0)optionModalState.selected.push(opt.label);else optionModalState.selected.splice(i,1);renderProductOptions()};w.appendChild(b)});
 }
-function decFromCart(key){
-  const i=st.cart.findIndex(x=>String(x.productKey)===String(key));
-  if(i<0)return 0;
-  st.cart[i].q--;
-  const q=st.cart[i].q;
-  if(q<=0){st.cart.splice(i,1);updateCart();return 0}
-  updateCart();return q;
-}
+function openProductOptions(p){optionModalState.product=p;optionModalState.selected=[];$('productOptionsTitle').textContent=productLabel(p)+' — opties';renderProductOptions();$('productOptions').hidden=false}
+function closeProductOptions(){$('productOptions').hidden=true;optionModalState.product=null;optionModalState.selected=[]}
+function decFromCart(key){const i=st.cart.findIndex(x=>String(x.productKey)===String(key));if(i<0)return 0;st.cart[i].q--;if(Array.isArray(st.cart[i].opties))st.cart[i].opties.pop();const q=st.cart[i].q;if(q<=0)st.cart.splice(i,1);updateCart();renderProducts();return Math.max(q,0)}
 function updateCart(){
   const n=st.cart.reduce((sum,x)=>sum+(Number(x.q)||0),0);
   const t=st.cart.reduce((sum,x)=>sum+(Number(x.p)||0)*(Number(x.q)||0),0);
@@ -368,17 +348,7 @@ function updateCart(){
   if(totalEl) totalEl.textContent=euro(t);
   if(barEl) barEl.hidden=n===0;
 }
-function openCart(){
-  const w=$('cartItems');w.innerHTML='';
-  st.cart.forEach((x,i)=>{
-    const r=document.createElement('div');r.className='cartrow';
-    r.innerHTML='<div class="left"><strong>'+esc(x.n)+'</strong><span class="qtypill">'+x.q+' × '+euro(x.p)+'</span></div><button class="minus" type="button" aria-label="Verwijder">−</button>';
-    r.querySelector('button').onclick=()=>{x.q--;if(x.q<=0)st.cart.splice(i,1);openCart();updateCart();renderProducts()};
-    w.appendChild(r);
-  });
-  $('cartTotal').textContent=euro(st.cart.reduce((s,x)=>s+x.p*x.q,0));
-  $('cart').hidden=false;
-}
+function openCart(){const w=$('cartItems');w.innerHTML='';st.cart.forEach((x,i)=>{const r=document.createElement('div');r.className='cartrow';const left=document.createElement('div');left.className='left';const strong=document.createElement('strong');strong.textContent=`${x.q}× ${x.n}`;left.appendChild(strong);const opts=Array.isArray(x.opties)?x.opties:[];if(opts.some(u=>Array.isArray(u)&&u.length)){const wrap=document.createElement('div');wrap.className='cart-options';opts.forEach((u,idx)=>{if(Array.isArray(u)&&u.length){const line=document.createElement('div');line.className='cart-option-line';line.textContent=`${x.q>1?`#${idx+1}: `:''}${u.map(label=>optionText(label,st.products[x.productKey])).join(', ')}`;wrap.appendChild(line)}});left.appendChild(wrap)}const pill=document.createElement('span');pill.className='qtypill';pill.textContent=`${x.q} × ${euro(x.p)}`;left.appendChild(pill);r.appendChild(left);const minus=document.createElement('button');minus.className='minus';minus.type='button';minus.textContent='−';minus.onclick=()=>{x.q--;if(Array.isArray(x.opties))x.opties.pop();if(x.q<=0)st.cart.splice(i,1);openCart();updateCart();renderProducts()};r.appendChild(minus);w.appendChild(r)});$('cartTotal').textContent=euro(st.cart.reduce((s,x)=>s+x.p*x.q,0));$('cart').hidden=false}
 function orderError(msg){
   const box=$('orderError');
   if(!msg){box.hidden=true;box.textContent='';return}
@@ -416,14 +386,16 @@ async function placeOrder(){
   const place=$('place'); place.disabled=true; place.textContent='Bestelling plaatsen…';
   try{
     const liveProducts=await readAny('restaurants/'+st.key+'/products');
-    const groups={keuken:{items:{},regels:[]},bar:{items:{},regels:[]}};
+    const groups={keuken:{items:{},itemOpties:{},regels:[]},bar:{items:{},itemOpties:{},regels:[]}};
     for(const x of st.cart){
       const live=liveProducts&&liveProducts[x.productKey];
       const fallback=st.products[x.productKey]||x;
       const bestemming=destinationFromProduct(live,destinationFromProduct(fallback,'keuken'))==='bar'?'bar':'keuken';
       if(!groups[bestemming].items[x.productKey]) groups[bestemming].items[x.productKey]=0;
       groups[bestemming].items[x.productKey]+=x.q;
-      groups[bestemming].regels.push({productKey:x.productKey,aantal:x.q,bestemming,product:x.n,emoji:(live?.emoji||fallback?.emoji||'')});
+      const gekozenOpties=Array.isArray(x.opties)?x.opties.map(u=>Array.isArray(u)?u.slice():[]):[];
+      if(gekozenOpties.some(u=>u.length))groups[bestemming].itemOpties[x.productKey]=gekozenOpties;
+      groups[bestemming].regels.push({productKey:x.productKey,aantal:x.q,bestemming,product:x.n,emoji:(live?.emoji||fallback?.emoji||''),opties:gekozenOpties});
     }
     const groupEntries=Object.entries(groups).filter(([,g])=>Object.keys(g.items).length>0);
     const orderGroupId=firebase.database().ref('restaurants/'+st.key+'/orders').push().key;
@@ -441,6 +413,7 @@ async function placeOrder(){
         items:g.items,
         regels:g.regels,
         itemDetails,
+        ...(Object.keys(g.itemOpties).length?{itemOpties:g.itemOpties}:{}),
         bestemming,
         orderGroupId,
         status:'nieuw',
@@ -497,7 +470,9 @@ function renderPlacedOrders(orders){
         const dest=(o.itemDetails?.[key]?.bestemming||o.bestemming||d.bestemming||'keuken');
         const prijs=Number(d.price)||0;
         total += prijs*(Number(q)||0);
-        itemLines.push(`<div class="order-item"><div><div class="order-item-name">${q}× ${esc(label)}</div><div class="order-item-dest">${dest==='bar'?'Bar':'Keuken'} · <span class="status-pill ${phaseClass}" style="padding:3px 7px;font-size:9px;vertical-align:middle"><span class="status-dot"></span>${phase}</span></div></div><div>${euro(prijs*Number(q||0))}</div></div>`);
+        const selected=o.itemOpties&&o.itemOpties[key];
+        const optionHtml=Array.isArray(selected)?selected.map((u,idx)=>Array.isArray(u)&&u.length?`<div class="order-item-options">${q>1?`#${idx+1}: `:''}${u.map(label=>esc(optionText(label,st.products[key]||d))).join(', ')}</div>`:'').join(''):'';
+        itemLines.push(`<div class="order-item"><div><div class="order-item-name">${q}× ${esc(label)}</div>${optionHtml}<div class="order-item-dest">${dest==='bar'?'Bar':'Keuken'} · <span class="status-pill ${phaseClass}" style="padding:3px 7px;font-size:9px;vertical-align:middle"><span class="status-dot"></span>${phase}</span></div></div><div>${euro(prijs*Number(q||0))}</div></div>`);
       });
     });
 
@@ -582,17 +557,19 @@ async function boot(){
     st.key=f.id;st.restaurant=f.data||{};$('restaurant').textContent=st.restaurant.naam||'Zelfservice';
     st.activeOrderGroups=savedOrderGroups();
 
-    const [layout,products,stock]=await Promise.all([
+    const [layout,products,stock,stockOpties]=await Promise.all([
       loadLayout(st.key),
       loadProducts(st.key),
-      readAny('restaurants/'+st.key+'/stock')
+      readAny('restaurants/'+st.key+'/stock'),
+      readAny('restaurants/'+st.key+'/stockOpties')
     ]);
-    st.layout=layout;st.products=products;st.stock=stock||{};
+    st.layout=layout;st.products=products;st.stock=stock||{};st.stockOpties=stockOpties||{};
     renderFloorplan();renderProducts();show('tablesStep');
 
     firebase.database().ref('restaurants/'+st.key+'/selfserviceconfig/plattegrond').on('value',s=>{if(s.val()!=null){st.layout=s.val();renderFloorplan()}});
     firebase.database().ref('restaurants/'+st.key+'/selfserviceconfig/producten').on('value',s=>{if(s.val()!=null){st.products=s.val();renderProducts()}});
     firebase.database().ref('restaurants/'+st.key+'/stock').on('value',s=>{st.stock=s.val()||{};renderProducts()});
+    firebase.database().ref('restaurants/'+st.key+'/stockOpties').on('value',s=>{st.stockOpties=s.val()||{}});
     startPlacedOrdersListener();
   }catch(e){console.error(e);status('Zelfservice kan niet starten','Firebase kon niet worden geladen of gelezen.',String(e?.stack||e))}
 }
@@ -603,6 +580,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('placedQuickFromTables').onclick=()=>{if(st.key){startPlacedOrdersListener();show('placedStep')}};
   $('placedQuickFromMenu').onclick=()=>{if(st.key){startPlacedOrdersListener();show('placedStep')}};
   $('cartOpen').onclick=openCart;$('cartClose').onclick=()=>$('cart').hidden=true;
+  $('productOptionsClose').onclick=closeProductOptions;
+  $('productOptionsCancel').onclick=closeProductOptions;
+  $('productOptionsConfirm').onclick=()=>{const p=optionModalState.product;if(!p)return;const chosen=optionModalState.selected.slice();closeProductOptions();addToCart(p,chosen)};
+  $('productOptions').addEventListener('click',e=>{if(e.target===$('productOptions'))closeProductOptions()});
   $('place').onclick=placeOrder;
   $('new').onclick=()=>show('menuStep');
   const watchdog=setTimeout(()=>{if(!$('loading').hidden){status('Verbinden duurt te lang','De gegevens van het restaurant konden niet binnen 8 seconden worden opgehaald.','Controleer de link en Firebase Rules. Open browserconsole voor meer details.')}},8000);
