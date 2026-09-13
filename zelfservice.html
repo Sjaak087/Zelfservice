@@ -448,49 +448,80 @@ async function placeOrder(){
 function renderPlacedOrders(orders){
   const w=$('placedOrders'); if(!w)return;
   const list=orders||[];
-  if(!list.length){w.innerHTML='<div class="placed-empty">Nog geen actieve bestellingen. Zodra je iets bestelt, verschijnt de voortgang hier automatisch.</div>';return}
+  if(!list.length){w.innerHTML='<div class="placed-empty">Nog geen actieve bestellingen voor deze tafel. Zodra je iets bestelt, verschijnt de voortgang hier automatisch.</div>';return}
+
+  // Groepeer bij voorkeur op orderGroupId. Oudere bestellingen hebben dat veld
+  // mogelijk niet; die krijgen hun eigen tijdelijke groep op basis van het order-id.
   const groups={};
   list.forEach(([id,o])=>{
-    if(!o.orderGroupId)return;
-    (groups[o.orderGroupId]??=[]).push([id,o]);
+    const gid=o.orderGroupId || ('legacy-'+id);
+    (groups[gid]??=[]).push([id,o]);
   });
+
   const entries=Object.entries(groups).sort((a,b)=>{
     const at=Math.min(...a[1].map(([,o])=>Number(o.tijd)||0));
     const bt=Math.min(...b[1].map(([,o])=>Number(o.tijd)||0));
     return bt-at;
   });
   w.innerHTML='';
+
   for(const [gid,parts] of entries){
-    const statuses=parts.map(([,o])=>o.status);
+    const statuses=parts.map(([,o])=>o.status||'nieuw');
     const overall=statuses.every(s=>s==='klaar')?'klaar':statuses.some(s=>s==='bereiden')?'bereiden':'nieuw';
     const first=parts[0][1];
     const card=document.createElement('article'); card.className='order-card';
     const itemLines=[];
+    let total=0;
+
     parts.forEach(([,o])=>{
+      const phase=orderStatusLabel(o.status||'nieuw');
+      const phaseClass=orderStatusClass(o.status||'nieuw');
+      const destination=o.bestemming==='bar'?'Bar':'Keuken';
       Object.entries(o.items||{}).forEach(([key,q])=>{
         const d=(o.itemDetails&&o.itemDetails[key])||(st.products[key]||{});
-        const label=d.label||key; const dest=(o.itemDetails?.[key]?.bestemming||o.bestemming||d.bestemming||'keuken');
-        itemLines.push(`<div class="order-item"><div><div class="order-item-name">${q}× ${esc(label)}</div><div class="order-item-dest">${dest==='bar'?'Bar':'Keuken'}</div></div><div>${euro((Number(d.price)||0)*Number(q||0))}</div></div>`);
+        const label=d.label||key;
+        const dest=(o.itemDetails?.[key]?.bestemming||o.bestemming||d.bestemming||'keuken');
+        const prijs=Number(d.price)||0;
+        total += prijs*(Number(q)||0);
+        itemLines.push(`<div class="order-item"><div><div class="order-item-name">${q}× ${esc(label)}</div><div class="order-item-dest">${dest==='bar'?'Bar':'Keuken'} · <span class="status-pill ${phaseClass}" style="padding:3px 7px;font-size:9px;vertical-align:middle"><span class="status-dot"></span>${phase}</span></div></div><div>${euro(prijs*Number(q||0))}</div></div>`);
       });
     });
-    const total=parts.reduce((sum,[,o])=>sum+Object.entries(o.items||{}).reduce((s,[k,q])=>{const d=o.itemDetails?.[k]||st.products[k]||{};return s+(Number(d.price)||0)*(Number(q)||0)},0),0);
-    card.innerHTML=`<div class="order-head"><div><strong>Bestelling voor ${first.tableKind==='bank'?'Bank':'Tafel'} ${esc(first.tableNumber)}</strong><div class="order-meta">Live status · ${parts.length>1?'naar bar en keuken':'naar '+(first.bestemming==='bar'?'bar':'keuken')}</div></div><span class="status-pill ${orderStatusClass(overall)}"><span class="status-dot"></span>${orderStatusLabel(overall)}</span></div><div class="order-items">${itemLines.join('')}</div><div class="order-total"><span>Totaal</span><span>${euro(total)}</span></div>`;
+
+    const tableLabel=first.tableKind==='bank'?'Bank':'Tafel';
+    const routeLabel=parts.length>1?'Bar + Keuken':destination;
+    card.innerHTML=`<div class="order-head"><div><strong>Bestelling voor ${tableLabel} ${esc(first.tableNumber ?? '—')}</strong><div class="order-meta">${routeLabel} · live bijgewerkt</div></div><span class="status-pill ${orderStatusClass(overall)}"><span class="status-dot"></span>${orderStatusLabel(overall)}</span></div><div class="order-items">${itemLines.join('')}</div><div class="order-total"><span>Totaal</span><span>${euro(total)}</span></div>`;
     w.appendChild(card);
   }
 }
 function startPlacedOrdersListener(){
   if(placedOrdersRef)placedOrdersRef.off();
   if(!st.key){renderPlacedOrders([]);return}
+
   st.activeOrderGroups=savedOrderGroups();
   placedOrdersRef=firebase.database().ref('restaurants/'+st.key+'/orders');
   placedOrdersRef.on('value',snap=>{
     const all=snap.val()||{};
-    const filtered=Object.entries(all).filter(([,o])=>o&&o.orderGroupId&&st.activeOrderGroups.includes(o.orderGroupId)&&o.status!=='geannuleerd');
-    renderPlacedOrders(filtered);
-    const activeGroups=new Set(filtered.map(([,o])=>o.orderGroupId));
-    st.activeOrderGroups=st.activeOrderGroups.filter(g=>activeGroups.has(g));
+    let filtered=Object.entries(all).filter(([,o])=>o&&o.status!=='geannuleerd');
+
+    // Toon primair de bestellingen van de gekozen tafel/bank. Dit maakt de tab ook
+    // bruikbaar voor oude orders die vóór orderGroupId zijn opgeslagen.
+    if(st.table){
+      const tableNo=String(st.table.number);
+      filtered=filtered.filter(([,o])=>String(o.tableNumber??'')===tableNo);
+    }else if(st.activeOrderGroups.length){
+      filtered=filtered.filter(([,o])=>o.orderGroupId&&st.activeOrderGroups.includes(o.orderGroupId));
+    }else{
+      filtered=[];
+    }
+
+    // Orders zonder groupId blijven zichtbaar. Nieuwe orders met een groupId worden
+    // ook lokaal onthouden zodat de klant ze na een refresh terugziet.
+    const foundGroups=filtered.map(([,o])=>o.orderGroupId).filter(Boolean);
+    st.activeOrderGroups=[...new Set([...st.activeOrderGroups,...foundGroups])].slice(-30);
     saveOrderGroups();
-    const count=st.activeOrderGroups.length;
+
+    renderPlacedOrders(filtered);
+    const count=filtered.length;
     $('placedNav').dataset.count=count?String(count):'';
     if(!count)$('placedNav').removeAttribute('data-count');
   });
